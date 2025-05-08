@@ -1,0 +1,39 @@
+{% extends 'accounts/buyer_base.html' %}
+
+{% block title %}Product Details{% endblock %}
+
+{% block content %}
+<div style="text-align: center;">
+    <h2>{{ product.name }}</h2>
+    <img src="{{ product.picture.url|default:'/media/product_images/default-image.jpg' }}" alt="{{ product.name }}" style="max-width: 300px;">
+    <p>Price: ${{ product.price }}</p>
+    <p>Available Quantity: {{ product.quantity }}</p>
+    <p>Category: {{ product.category }}</p>
+    <p>Season: {{ product.season }}</p>
+
+    {% if product.quantity > 0 %}
+    <form method="post" style="margin-top: 20px;">
+        {% csrf_token %}
+        <label for="quantity">Order Quantity:</label>
+        <input type="number" name="quantity" min="1" max="{{ product.quantity }}" required>
+
+        <br><br>
+        <label for="delivery_address">Delivery Address:</label>
+        <textarea name="delivery_address" required></textarea>
+
+        <br><br>
+        <button type="submit">Place Order</button>
+    </form>
+    {% else %}
+    <p style="color: red;">Out of Stock</p>
+    {% endif %}
+
+    {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li {% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+{% endblock %}

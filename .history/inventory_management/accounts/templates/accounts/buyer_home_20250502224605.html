@@ -1,0 +1,79 @@
+{% extends 'accounts/buyer_base.html' %}
+{% block title %}Product List{% endblock %}
+
+{% block extra_css %}
+<style>
+    .product-grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 20px;
+        justify-content: center;
+    }
+    .product-card {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px;
+        width: 200px;
+        box-shadow: 0 0 5px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .product-card img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 4px;
+    }
+    .product-card-content h5 {
+        margin: 10px 0 5px;
+    }
+    .product-card-content p {
+        margin: 5px 0;
+    }
+    .filter-form {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    .filter-form select {
+        padding: 8px 12px;
+        font-size: 16px;
+    }
+    /* Hover effect */
+    .product-card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h2 style="text-align: center; margin-bottom: 20px;">Product List</h2>
+
+<form class="filter-form" method="get">
+    <label for="category-select">Filter by Category:</label>
+    <select name="category_id" id="category-select" onchange="this.form.submit()">
+        <option value="">All Categories</option>
+        {% for category in categories %}
+            <option value="{{ category.id }}" {% if selected_category_id == category.id|stringformat:'s' %}selected{% endif %}>
+                {{ category.name }}
+            </option>
+        {% endfor %}
+    </select>
+</form>
+
+<div class="product-grid">
+    {% for product in products %}
+        <div class="product-card">
+            <img src="{{ product.picture.url|default:'/media/product_images/default-image.jpg' }}" alt="{{ product.name }}">
+            <div class="product-card-content">
+                <h5>{{ product.name }}</h5>
+                <p>Price: ${{ product.price }}</p>
+                <p>Quantity: {{ product.quantity }}</p>
+            </div>
+        </div>
+    {% empty %}
+        <p style="text-align: center; width: 100%;">No products found.</p>
+    {% endfor %}
+</div>
+
+{% endblock %}

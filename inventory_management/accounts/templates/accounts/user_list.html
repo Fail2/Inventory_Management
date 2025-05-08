@@ -1,0 +1,49 @@
+{% extends 'accounts/admin_base.html' %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<div class="header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <h2>{{ title }}</h2>
+    <a href="{% url 'add_user' user_type %}" 
+       style="background: #007bff; color: white; padding: 8px 12px; border-radius: 4px; text-decoration: none; display: inline-flex; align-items: center; gap: 5px;">
+        <i class="fas fa-plus"></i> Add {{ user_type|capfirst }}
+    </a>
+</div>
+
+<div class="orders-table" style="background: white; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); padding: 20px;">
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr>
+                <th style="background: #212529; color: white;">Name</th>
+                <th style="background: #212529; color: white;">Email</th>
+                <th style="background: #212529; color: white;">Address</th>
+                <th style="background: #212529; color: white;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr>
+                <td>{{ user.full_name }}</td>
+                <td>{{ user.email }}</td>
+                <td>{{ user.address|truncatechars:30 }}</td>
+                <td style="display: flex; gap: 5px; justify-content: center;">
+                    <a href="{% url 'edit_user' user_type user.id %}" 
+                       style="background: #17a2b8; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none;">
+                        <i class="fas fa-edit"></i>
+                    </a>
+                    <a href="{% url 'delete_user' user_type user.id %}" 
+                       style="background: #dc3545; color: white; padding: 5px 10px; border-radius: 4px; text-decoration: none;">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="text-align: center;">No {{ user_type }}s found</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,73 @@
+{% extends 'accounts/buyer_base.html' %}
+
+{% block title %}Your Orders{% endblock %}
+
+{% block extra_css %}
+<style>
+    .table-container {
+        max-height: 400px;         /* Limit height */
+        overflow-y: auto;          /* Vertical scroll if needed */
+        overflow-x: auto;          /* Horizontal scroll if too wide */
+        border: 1px solid #ddd;
+        margin-top: 20px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        padding: 10px;
+        text-align: center;
+        border: 1px solid #ddd;
+    }
+    img {
+        max-width: 100px;
+        height: auto;
+    }
+    @media screen and (max-width: 600px) {
+        th, td {
+            font-size: 12px;
+            padding: 5px;
+        }
+        img {
+            max-width: 60px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<h2>Your Orders</h2>
+
+<div class="table-container">
+    <table>
+        <thead>
+            <tr>
+                <th>Product Image</th>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Status</th>
+                <th>Order Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>
+                    <img src="{{ order.product.picture.url|default:'/media/product_images/default-image.jpg' }}" alt="{{ order.product.name }}">
+                </td>
+                <td>{{ order.product.name }}</td>
+                <td>{{ order.quantity }}</td>
+                <td>{{ order.status }}</td>
+                <td>{{ order.order_date|date:"Y-m-d" }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5">You have no orders.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends 'accounts/buyer_base.html' %}
+{% block title %}Product Detail{% endblock %}
+
+{% block extra_css %}
+<style>
+    .product-detail {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 20px;
+        margin-top: 20px;
+    }
+    .product-image img {
+        max-width: 100%;
+        height: auto;
+        border-radius: 8px;
+    }
+    .product-info {
+        text-align: center;
+    }
+    .order-form {
+        display: flex;
+        justify-content: center;
+        gap: 20px;
+        margin-top: 20px;
+    }
+    .quantity-control input {
+        width: 50px;
+        padding: 5px;
+        text-align: center;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="product-detail">
+    <div class="product-image">
+        <img src="{{ product.picture.url|default:'/media/product_images/default-image.jpg' }}" alt="{{ product.name }}">
+    </div>
+    <div class="product-info">
+        <h2>{{ product.name }}</h2>
+        <p><strong>Price:</strong> ${{ product.price }}</p>
+        <p><strong>Quantity Available:</strong> {{ product.quantity }}</p>
+        <p><strong>Description:</strong> {{ product.description }}</p>
+    </div>
+    
+    <form method="post" action="{% url 'place_order' product.id %}" class="order-form">
+        {% csrf_token %}
+        <div class="quantity-control">
+            <label for="quantity">Quantity:</label>
+            <input type="number" name="quantity" id="quantity" min="1" max="{{ product.quantity }}" value="1" required>
+        </div>
+        <button type="submit">Place Order</button>
+    </form>
+    
+    {% if error_message %}
+        <p style="color: red; text-align: center;">{{ error_message }}</p>
+    {% endif %}
+</div>
+{% endblock %}

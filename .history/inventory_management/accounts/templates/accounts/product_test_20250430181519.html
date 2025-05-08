@@ -1,0 +1,33 @@
+{% extends 'accounts/admin_base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Product List</h2>
+
+    {% if pro %}
+    <div class="row">
+        {% for product in pro %}
+        <div class="col-md-4 mb-4">
+            <div class="card h-100">
+                {% if product.picture %}
+                <img src="{{ product.picture.url }}" class="card-img-top" alt="{{ product.name }}">
+                {% endif %}
+                <div class="card-body">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">
+                        <strong>Category:</strong> {{ product.category.name }}<br>
+                        <strong>Season:</strong> {{ product.season.name }}<br>
+                        <strong>Price:</strong> ${{ product.price }}<br>
+                        <strong>Quantity:</strong> {{ product.quantity }}<br>
+                        <strong>Supplier:</strong> {{ product.supplier.full_name }}
+                    </p>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>No products found.</p>
+    {% endif %}
+</div>
+{% endblock %}

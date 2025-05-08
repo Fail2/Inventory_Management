@@ -1,0 +1,196 @@
+{% extends 'accounts/admin_base.html' %}
+{% block title %}Product List{% endblock %}
+
+{% block content %}
+<div class="product-container">
+    <!-- Header -->
+    <div class="header">
+        <h2>Product List</h2>
+        <a href="{% url 'add_product' %}" class="add-btn">
+            <i class="fas fa-plus"></i> Add Product
+        </a>
+    </div>
+
+    <!-- Product Grid -->
+    <div class="product-grid">
+        {% for product in pro %}
+        <div class="product-card">
+            <div class="product-image">
+                <img src="{{ product.picture.url|default:'/media/product_images/default-image.jpg' }}" alt="{{ product.name }}">
+            </div>
+            <div class="product-info">
+                <h5>{{ product.name }}</h5>
+                <p>Price: ${{ product.price }}</p>
+                <p>Quantity: {{ product.quantity }}</p>
+                <div class="action-buttons">
+                    <a href="{% url 'edit_product' product.id %}" class="btn btn-primary">Edit</a>
+                    <a href="{% url 'delete_product' product.id %}" class="btn btn-danger">Delete</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>No products available.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    /* Ensure full page height and Y-axis scroll */
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+        overflow-y: auto;
+    }
+
+    .product-container {
+        padding: 20px;
+        box-sizing: border-box;
+        width: 100%;
+    }
+
+    /* Header Section */
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap; /* Allow wrap on smaller screens */
+    }
+
+    .header h2 {
+        margin: 0;
+        font-size: 24px;
+    }
+
+    .add-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #007bff;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 14px;
+        transition: background 0.3s ease;
+    }
+
+    .add-btn:hover {
+        background: #0056b3;
+    }
+
+    /* Product Grid */
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+    }
+
+    /* Product Card */
+    .product-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .product-image {
+        width: 100%;
+        height: 180px;
+        overflow: hidden;
+    }
+
+    .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .product-info {
+        padding: 15px;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .product-info h5 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .product-info p {
+        margin: 0;
+        font-size: 14px;
+        opacity: 0.7;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 14px;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        flex: 1;
+    }
+
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: #a71d2a;
+    }
+
+    /* Responsive tweaks */
+    @media (max-width: 500px) {
+        .header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .action-buttons {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

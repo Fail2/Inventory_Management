@@ -1,0 +1,119 @@
+{% extends 'accounts/admin_base.html' %}
+{% block title %}Admin - Orders{% endblock %}
+
+{% block content %}
+<h2>Order List</h2>
+
+<div class="orders-table">
+    <table>
+        <thead>
+            <tr>
+                <th>Product Image</th>
+                <th>Product Name</th>
+                <th>Quantity</th>
+                <th>Buyer</th>
+                <th>Supplier</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>
+                    <img src="{{ order.product.picture.url|default:'/media/product_images/default-image.jpg' }}"
+                         alt="{{ order.product.name }}" width="60" height="60">
+                </td>
+                <td>{{ order.product.name }}</td>
+                <td>{{ order.quantity }}</td>
+                <td>{{ order.buyer.full_name }}</td>
+
+                <!-- Supplier Column -->
+                <td>
+                    {% if order.supplier %}
+                        {{ order.supplier.full_name }}
+                    {% else %}
+                        <form method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <input type="hidden" name="order_id" value="{{ order.id }}">
+                            <select name="supplier_id" required>
+                                <option value="">Select Supplier</option>
+                                {% for supplier in suppliers %}
+                                <option value="{{ supplier.id }}" {% if order.supplier and supplier.id == order.supplier.id %}selected{% endif %}>
+                                    {{ supplier.full_name }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit" style="padding: 5px 10px;">Assign Supplier</button>
+                        </form>
+                    {% endif %}
+                </td>
+
+                <!-- Status Column -->
+                <td>
+                    <form method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                        <select name="status" required>
+                            {% for value, label in status_choices %}
+                            <option value="{{ value }}" {% if order.status == value %}selected{% endif %}>
+                                {{ label }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit" style="padding: 5px 10px;">Update Status</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">No orders found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+{% block extra_css %}
+<style>
+    .orders-table {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        margin-top: 20px;
+        max-height: 500px;  /* Set a fixed height for the table to allow vertical scrolling */
+        overflow-y: auto;   /* Enable vertical scrolling */
+        overflow-x: hidden; /* Disable horizontal scrolling */
+    }
+
+    .orders-table h2 {
+        margin-bottom: 15px;
+    }
+
+    .orders-table table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed; /* Ensure the table width stays fixed */
+    }
+
+    .orders-table thead {
+        background-color: #212529;
+        color: white;
+    }
+
+    .orders-table th,
+    .orders-table td {
+        text-align: center;
+        padding: 10px;
+        border: 1px solid #ddd;
+    }
+
+    .orders-table tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    .orders-table tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+</style>
+{% endblock %}

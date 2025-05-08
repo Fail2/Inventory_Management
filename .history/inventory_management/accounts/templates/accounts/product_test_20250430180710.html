@@ -1,0 +1,46 @@
+{% extends 'accounts.admin_base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Product List</h2>
+
+    {% if pro %}
+        <table class="table table-bordered table-striped">
+            <thead class="thead-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Picture</th>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Season</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Supplier</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in pro %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+                    <td>
+                        {% if product.picture %}
+                            <img src="{{ product.picture.url }}" alt="{{ product.name }}" style="width: 80px; height: auto;">
+                        {% else %}
+                            No Image
+                        {% endif %}
+                    </td>
+                    <td>{{ product.name }}</td>
+                    <td>{{ product.category.name }}</td>
+                    <td>{{ product.season.name }}</td>
+                    <td>${{ product.price }}</td>
+                    <td>{{ product.quantity }}</td>
+                    <td>{{ product.supplier.full_name }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No products available.</p>
+    {% endif %}
+</div>
+{% endblock %}

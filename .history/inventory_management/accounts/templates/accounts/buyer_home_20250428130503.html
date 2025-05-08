@@ -1,0 +1,77 @@
+{% extends 'accounts/buyer_base.html' %}
+
+{% block content %}
+    <div class="products-container">
+        <div class="products">
+            {% for product in products %}
+            <div class="product">
+                <h3>{{ product.name }}</h3>
+                <p>Price: ${{ product.price }}</p>
+                <p>Stock: {{ product.quantity }}</p>
+                <p>Category: {{ product.category.name }}</p>
+                {% if product.season %}
+                <p>Season: {{ product.season.name }}</p>
+                {% endif %}
+                <a class="buy-btn" href="{% url 'place_order' product.id %}">Buy Now</a>
+            </div>
+            {% empty %}
+            <div class="no-products-message">
+                <p>No products available right now.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block styles %}
+    <style>
+        .products-container {
+            margin-top: 20px;
+        }
+        .products {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        .product {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .product h3 {
+            margin-bottom: 10px;
+            color: #007bff;
+        }
+        .product p {
+            margin-bottom: 10px;
+        }
+        .buy-btn {
+            display: inline-block;
+            padding: 10px 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        .buy-btn:hover {
+            background: #218838;
+        }
+        
+        /* Center the "No products available" message */
+        .no-products-message {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-size: 18px;
+            color: #333;
+            text-align: center;
+            font-weight: bold;
+        }
+    </style>
+{% endblock %}

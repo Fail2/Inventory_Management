@@ -1,0 +1,31 @@
+<h3>Add New Buyer</h3>
+<form method="post" class="add-buyer-form">
+    {% csrf_token %}
+    <div>
+        {{ form.full_name.label_tag }}
+        {{ form.full_name }}
+    </div>
+    <div>
+        {{ form.address.label_tag }}
+        {{ form.address }}
+    </div>
+    <div>
+        {{ form.email.label_tag }}
+        {{ form.email }}
+    </div>
+    <div>
+        {{ form.username.label_tag }}
+        {{ form.username }}
+    </div>
+    <div style="display: flex; gap: 10px;">
+        <div style="flex: 1;">
+            {{ form.password.label_tag }}
+            {{ form.password }}
+        </div>
+        <div style="flex: 1;">
+            {{ form.confirm_password.label_tag }}
+            {{ form.confirm_password }}
+        </div>
+    </div>
+    <button type="submit"><i class="fas fa-plus"></i> Save</button>
+</form>

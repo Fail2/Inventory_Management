@@ -1,0 +1,18 @@
+<!-- buyer_home.html -->
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Products</h2>
+  <ul>
+    {% for product in products %}
+      <li>
+        {{ product.name }} - ${{ product.price }}
+        <form method="POST" action="{% url 'order_product' product.id %}">
+          {% csrf_token %}
+          <input type="number" name="quantity" min="1" required>
+          <button type="submit">Order</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}

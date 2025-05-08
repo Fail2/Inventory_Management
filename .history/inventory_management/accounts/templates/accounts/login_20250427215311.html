@@ -1,0 +1,57 @@
+<form method="POST">
+    {% csrf_token %}
+    <select name="user_type" required>
+        <option value="buyer">Buyer</option>
+        <option value="supplier">Supplier</option>
+    </select>
+
+    <input type="text" name="username" placeholder="Username" required>
+    <input type="password" name="password" placeholder="Password" required>
+
+    <button type="submit">Login</button>
+
+    <p style="margin-top:10px;">
+        <a href="{% url 'admin_login' %}">Login as Admin</a>
+    </p>
+</form>
+
+<!-- SweetAlert2 Flash Messages -->
+{% if messages %}
+  <script>
+    {% for message in messages %}
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: '{% if message.tags == "success" %}success{% elif message.tags == "error" %}error{% else %}info{% endif %}',
+        title: '{{ message|escapejs }}',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      });
+    {% endfor %}
+  </script>
+{% endif %}
+
+<!-- Loading Spinner + Disable Submit -->
+<div id="spinner-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(255,255,255,0.7); z-index:9999; justify-content:center; align-items:center;">
+    <div class="spinner" style="border:8px solid #f3f3f3; border-top:8px solid #007bff; border-radius:50%; width:60px; height:60px; animation:spin 1s linear infinite;"></div>
+</div>
+
+<style>
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+</style>
+
+<script>
+document.querySelector('form').addEventListener('submit', function() {
+    // Show spinner
+    document.getElementById('spinner-overlay').style.display = 'flex';
+
+    // Disable submit button
+    const submitButton = document.querySelector('button[type="submit"]');
+    submitButton.disabled = true;
+    submitButton.style.backgroundColor = '#ccc';
+});
+</script>

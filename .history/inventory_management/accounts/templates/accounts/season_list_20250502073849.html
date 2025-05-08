@@ -1,0 +1,67 @@
+{% extends 'accounts/admin_base.html' %}
+{% block title %}Season-wise Products{% endblock %}
+
+{% block content %}
+<div class="product-container">
+    <!-- Header -->
+    <div class="header">
+        <h2>Season-wise Product List</h2>
+        <a href="{% url 'add_season' %}" class="add-btn">
+            <i class="fas fa-plus"></i> Add Season
+        </a>
+    </div>
+
+    <!-- Loop over Seasons -->
+    {% for season in seasons %}
+    <div class="season-section">
+        <h3>{{ season.name }}</h3>
+
+        <div class="product-grid">
+            {% with season_products=products_by_season|get_item:season.id %}
+            {% if season_products %}
+                {% for product in season_products %}
+                <div class="product-card">
+                    <div class="product-image">
+                        <img src="{{ product.picture.url|default:'/media/product_images/default-image.jpg' }}" alt="{{ product.name }}">
+                    </div>
+                    <div class="product-info">
+                        <h5>{{ product.name }}</h5>
+                        <p>Price: ${{ product.price }}</p>
+                        <p>Quantity: {{ product.quantity }}</p>
+                        <div class="action-buttons">
+                            <a href="{% url 'edit_product' product.id %}" class="btn btn-primary">Edit</a>
+                            <a href="{% url 'delete_product' product.id %}" class="btn btn-danger">Delete</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No products available in this season.</p>
+            {% endif %}
+            {% endwith %}
+        </div>
+    </div>
+    <hr>
+    {% empty %}
+    <p>No seasons available.</p>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_css %}
+{{ block.super }}
+<style>
+    .season-section {
+        margin-bottom: 40px;
+    }
+
+    .season-section h3 {
+        margin-bottom: 15px;
+        font-size: 20px;
+        color: #333;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

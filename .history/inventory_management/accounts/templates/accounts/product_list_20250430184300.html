@@ -1,0 +1,124 @@
+{% extends 'accounts/admin_base.html' %}
+{% block title %}Product List{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-4">
+    <!-- Updated header style for Product List -->
+    <div class="header d-flex justify-content-between align-items-center mb-4">
+        <h2>Product List</h2>
+        <a href="{% url 'add_product' %}" class="btn btn-primary add-btn">
+            <i class="fas fa-plus"></i> Add Product
+        </a>
+    </div>
+
+    <div class="row">
+        {% for product in pro %}
+        <div class="col-md-3 mb-4">
+            <div class="card product-card">
+                <!-- Separate div for image with specific styling -->
+                <div class="product-image" style="height: 200px; overflow: hidden;">
+                    <img src="{{ product.image.url|default:'/media/product_images/default-image.jpg' }}"
+                        alt="{{ product.name }}" class="card-img-top"
+                        style="width: 100%; object-fit: cover;">
+                </div>
+                <div class="card-body" style="color: black;">
+                    <h5 class="card-title">{{ product.name }}</h5>
+                    <p class="card-text">Price: ${{ product.price }}</p>
+                    <p class="card-text">Quantity: {{ product.quantity }}</p>
+                    <a href="{% url 'edit_product' product.id %}" class="btn btn-primary">Edit</a>
+                    <a href="{% url 'delete_product' product.id %}" class="btn btn-danger">Delete</a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <p>No products available.</p>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    /* Styling for header section */
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .add-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    /* Styling for product cards */
+    .product-card {
+        position: relative;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .product-card img {
+        width: 100%;
+        height: 200px;
+        object-fit: cover;
+        transition: transform 0.3s ease;
+    }
+
+    .product-card:hover img {
+        transform: scale(1.05);
+    }
+
+    .product-hover {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.6);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        border-radius: 10px;
+    }
+
+    .product-card:hover .product-hover {
+        opacity: 1;
+    }
+
+    .product-hover a {
+        font-size: 16px;
+        padding: 10px 20px;
+        border-radius: 5px;
+        transition: background-color 0.3s ease;
+    }
+
+    .product-hover a.btn-primary {
+        background-color: #4e73df;
+    }
+
+    .product-hover a.btn-primary:hover {
+        background-color: #2e59d9;
+    }
+
+    .product-hover a.btn-danger {
+        background-color: #e74a3b;
+    }
+
+    .product-hover a.btn-danger:hover {
+        background-color: #c0392b;
+    }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+{% endblock %}

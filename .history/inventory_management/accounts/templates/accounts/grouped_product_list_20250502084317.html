@@ -1,0 +1,149 @@
+{% extends 'accounts/admin_base.html' %}
+{% load custom_tags %}
+{% block title %}Products by {{ group_by|title }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Product Grid */
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+    }
+
+    /* Product Card */
+    .product-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .product-image {
+        width: 100%;
+        height: 180px;
+        overflow: hidden;
+    }
+
+    .product-image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .product-info {
+        padding: 15px;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .product-info h5 {
+        margin: 0;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .product-info p {
+        margin: 0;
+        font-size: 14px;
+        opacity: 0.7;
+    }
+    .add-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #007bff;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 14px;
+        transition: background 0.3s ease;
+    }
+
+    .add-btn:hover {
+        background: #0056b3;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 14px;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        flex: 1;
+    }
+
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: #a71d2a;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="header">
+        <h2>Products by {{ group_by|title }}</h2>
+        <a href="{% url 'add_product' %}" class="add-btn">
+            <i class="fas fa-plus"></i> Add Product
+        </a>
+    </div>
+
+    {% for group in groups %}
+        <h3>{{ group.name }}</h3>
+        <div class="product-grid">
+            {% with products=products_by_group|get_item:group.id %}
+                {% if products %}
+                    {% for product in products %}
+                        <div class="product-card">
+                            <img src="{{ product.picture.url|default:'/media/product_images/default-image.jpg' }}" alt="{{ product.name }}">
+                            <h5>{{ product.name }}</h5>
+                            <p>Price: ${{ product.price }}</p>
+                            <p>Quantity: {{ product.quantity }}</p>
+                            <div>
+                                <a href="{% url 'edit_product' product.id %}" class="btn btn-primary">Edit</a>
+                                <a href="{% url 'delete_product' product.id %}" class="btn btn-danger">Delete</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No products under {{ group.name }}.</p>
+                {% endif %}
+            {% endwith %}
+        </div>
+        <hr>
+    {% endfor %}
+</div>
+{% endblock %}

@@ -1,0 +1,123 @@
+{% extends 'accounts/buyer_base.html' %}
+
+{% block title %}Your Orders{% endblock %}
+
+{% block extra_css %}
+<style>
+    html, body {
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+
+    .page-wrapper {
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+
+    h2 {
+        text-align: center;
+        margin: 20px 0;
+    }
+
+    .table-container {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        margin: 0 20px 20px 20px;
+        border: 1px solid #ddd;
+    }
+
+    /* Header table */
+    .table-header table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    /* Body table */
+    .table-body {
+        flex: 1;
+        overflow-y: auto;
+        max-height: 70vh;  /* You can adjust the scrollable height */
+    }
+
+    .table-body table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: fixed;
+    }
+
+    th, td {
+        padding: 10px;
+        text-align: center;
+        border: 1px solid #ddd;
+    }
+
+    .table-header th {
+        background-color: #f9f9f9;
+    }
+
+    img {
+        max-width: 100px;
+        height: auto;
+    }
+
+    @media screen and (max-width: 600px) {
+        th, td {
+            font-size: 12px;
+            padding: 5px;
+        }
+        img {
+            max-width: 60px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-wrapper">
+    <h2>Your Orders</h2>
+
+    <div class="table-container">
+        <!-- Header Table -->
+        <div class="table-header">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product Image</th>
+                        <th>Product</th>
+                        <th>Quantity</th>
+                        <th>Status</th>
+                        <th>Order Date</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+
+        <!-- Scrollable Body Table -->
+        <div class="table-body">
+            <table>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>
+                            <img src="{{ order.product.picture.url|default:'/media/product_images/default-image.jpg' }}" alt="{{ order.product.name }}">
+                        </td>
+                        <td>{{ order.product.name }}</td>
+                        <td>{{ order.quantity }}</td>
+                        <td>{{ order.status }}</td>
+                        <td>{{ order.order_date|date:"Y-m-d" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5">You have no orders.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

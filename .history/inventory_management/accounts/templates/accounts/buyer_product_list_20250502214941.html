@@ -1,0 +1,78 @@
+{% extends 'accounts/buyer_base.html' %}
+{% block title %}Product List{% endblock %}
+{% load static %}
+
+{% block content %}
+<h2>Product List</h2>
+
+<div>
+    <form id="category-form" method="get">
+        <select name="category_id" id="category-select">
+            <option value="">All Categories</option>
+            {% for category in categories %}
+                <option value="{{ category.id }}" {% if selected_category_id == category.id|stringformat:'s' %}selected{% endif %}>
+                    {{ category.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </form>
+</div>
+
+<div id="product-grid" class="product-grid">
+    {% for product in initial_products %}
+        <div class="product-card">
+            <img src="{{ product.picture.url|default:'/media/product_images/default-image.jpg' }}" alt="{{ product.name }}">
+            <div class="product-card-content">
+                <h5>{{ product.name }}</h5>
+                <p>Price: ${{ product.price }}</p>
+                <p>Quantity: {{ product.quantity }}</p>
+            </div>
+        </div>
+    {% endfor %}
+</div>
+
+<div style="text-align: center; margin-top: 20px;">
+    <button id="load-more-btn" class="btn btn-primary">Load More</button>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const loadMoreBtn = document.getElementById('load-more-btn');
+    const productGrid = document.getElementById('product-grid');
+    const categorySelect = document.getElementById('category-select');
+    let offset = {{ initial_products|length }};
+    const limit = 30;
+    let categoryId = categorySelect.value;
+
+    categorySelect.addEventListener('change', function() {
+        document.getElementById('category-form').submit();
+    });
+
+    loadMoreBtn.addEventListener('click', function() {
+        fetch(`?offset=${offset}&category_id=${categoryId}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => response.json())
+        .then(data => {
+            data.products.forEach(product => {
+                const card = document.createElement('div');
+                card.classList.add('product-card');
+                card.innerHTML = `
+                    <img src="${product.picture_url}" alt="${product.name}">
+                    <div class="product-card-content">
+                        <h5>${product.name}</h5>
+                        <p>Price: $${product.price}</p>
+                        <p>Quantity: ${product.quantity}</p>
+                    </div>
+                `;
+                productGrid.appendChild(card);
+            });
+            offset += limit;
+            if (!data.has_more) {
+                loadMoreBtn.style.display = 'none';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

@@ -1,0 +1,140 @@
+{% extends 'accounts/admin_base.html' %}
+{% block title %}Edit Product{% endblock %}
+
+{% block content %}
+<div class="edit-container">
+    <div class="edit-card">
+        <div class="edit-header">
+            <h2>Edit Product</h2>
+            <a href="{% url 'product_list' %}" class="back-link">← Back to Product List</a>
+        </div>
+        <form method="POST" enctype="multipart/form-data" class="edit-form">
+            {% csrf_token %}
+            {% for field in form %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div class="error-text">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+            <div class="form-actions">
+                <button type="submit" class="btn-save">💾 Save Changes</button>
+                <a href="{% url 'product_list' %}" class="btn-cancel">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .edit-container {
+        max-width: 700px;
+        margin: 50px auto;
+        padding: 20px;
+    }
+
+    .edit-card {
+        background: #ffffff;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .edit-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 25px;
+    }
+
+    .edit-header h2 {
+        margin: 0;
+        font-size: 24px;
+        color: #333;
+    }
+
+    .back-link {
+        font-size: 14px;
+        color: #0066cc;
+        text-decoration: none;
+    }
+
+    .back-link:hover {
+        text-decoration: underline;
+    }
+
+    .edit-form .form-group {
+        margin-bottom: 20px;
+    }
+
+    .edit-form label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 5px;
+        color: #444;
+    }
+
+    .edit-form input,
+    .edit-form select,
+    .edit-form textarea {
+        width: 100%;
+        padding: 10px 12px;
+        font-size: 14px;
+        border: 1px solid #bbb;
+        border-radius: 6px;
+        box-sizing: border-box;
+    }
+
+    .help-text {
+        font-size: 12px;
+        color: #666;
+    }
+
+    .error-text {
+        font-size: 13px;
+        color: red;
+        margin-top: 5px;
+    }
+
+    .form-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 30px;
+    }
+
+    .btn-save {
+        background-color: #28a745;
+        color: #fff;
+        padding: 10px 18px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-weight: 600;
+    }
+
+    .btn-save:hover {
+        background-color: #218838;
+    }
+
+    .btn-cancel {
+        background-color: #aaa;
+        color: #fff;
+        padding: 10px 16px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+    .btn-cancel:hover {
+        background-color: #888;
+    }
+</style>
+{% endblock %}

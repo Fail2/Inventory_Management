@@ -1,0 +1,80 @@
+{% extends 'accounts/admin_base.html' %}
+{% block title %}Admin Orders{% endblock %}
+
+{% block content %}
+<h2>Order List</h2>
+
+<div class="orders-table">
+    <table>
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Picture</th>
+                <th>Quantity</th>
+                <th>Buyer</th>
+                <th>Supplier</th>
+                <th>Assign Supplier</th>
+                <th>Status</th>
+                <th>Update Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.product.name }}</td>
+                <td>
+                    <img src="{{ order.product.picture.url|default:'/media/product_images/default-image.jpg' }}" 
+                         alt="{{ order.product.name }}" 
+                         style="width: 80px; height: auto; border-radius: 4px;">
+                </td>
+                <td>{{ order.quantity }}</td>
+                <td>{{ order.buyer.username }}</td>
+                <td>
+                    {% if order.supplier %}
+                        {{ order.supplier.name }}
+                    {% else %}
+                        <span style="color: red;">Not Assigned</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if not order.supplier %}
+                    <form method="post" style="display: flex; gap: 5px;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="assign_supplier">
+                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                        <select name="supplier_id" required>
+                            <option value="">Select Supplier</option>
+                            {% for supplier in suppliers %}
+                                <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit">Assign</button>
+                    </form>
+                    {% else %}
+                        <span style="color: green;">Assigned</span>
+                    {% endif %}
+                </td>
+                <td>{{ order.status }}</td>
+                <td>
+                    <form method="post" style="display: flex; gap: 5px;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="update_status">
+                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                        <select name="status" required>
+                            <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="processing" {% if order.status == 'processing' %}selected{% endif %}>Processing</option>
+                            <option value="completed" {% if order.status == 'completed' %}selected{% endif %}>Completed</option>
+                        </select>
+                        <button type="submit">Update</button>
+                    </form>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="8">No orders found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

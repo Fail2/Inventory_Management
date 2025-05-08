@@ -1,0 +1,56 @@
+<!-- buyer_base.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inventory Management</title>
+
+    <!-- Load static files -->
+    {% load static %}
+
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    <header>
+        <!-- Top Navbar -->
+        <nav class="navbar">
+            <div class="navbar-container">
+                <a href="{% url 'buyer_home' %}" class="navbar-logo">Inventory <span>Management</span></a>
+                <ul class="navbar-links">
+                    <li><a href="{% url 'buyer_home' %}">Home</a></li>
+                    <li><a href="{% url 'order_history' %}">Your Orders</a></li>
+                    <li><a href="{% url 'account' %}">Account</a></li>
+                    <li><a href="{% url 'logout' %}">Logout</a></li>
+                </ul>
+            </div>
+        </nav>
+    </header>
+    
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <h2>Buyer Dashboard</h2>
+        <a href="{% url 'buyer_home' %}">
+            <i class="fas fa-home"></i> Home
+        </a>
+        <a href="{% url 'order_history' %}">
+            <i class="fas fa-box"></i> Orders
+        </a>
+        <a href="{% url 'account' %}">
+            <i class="fas fa-user"></i> Account
+        </a>
+        <!-- Logout Button -->
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </form>
+    </div>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <script src="{% static 'js/navbar.js' %}"></script>
+</body>
+</html>

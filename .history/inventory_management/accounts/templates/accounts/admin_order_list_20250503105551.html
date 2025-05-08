@@ -1,0 +1,59 @@
+{% extends 'accounts/admin_base.html' %}
+{% block title %}Admin Orders{% endblock %}
+
+{% block content %}
+<h2>Order List</h2>
+
+<div class="orders-table">
+    <table>
+        <thead>
+            <tr>
+                <th>Status</th>
+                <th>Product</th>
+                <th>Quantity</th>
+                <th>Buyer</th>
+                <th>Supplier</th>
+                <th>Assign Supplier</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for order in orders %}
+            <tr>
+                <td>{{ order.status }}</td>
+                <td>{{ order.product.name }}</td>
+                <td>{{ order.quantity }}</td>
+                <td>{{ order.buyer.username }}</td>
+                <td>
+                    {% if order.supplier %}
+                        {{ order.supplier.name }}
+                    {% else %}
+                        <span style="color: red;">Not Assigned</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if not order.supplier %}
+                    <form method="post" style="display: flex; gap: 5px;">
+                        {% csrf_token %}
+                        <input type="hidden" name="order_id" value="{{ order.id }}">
+                        <select name="supplier_id" required>
+                            <option value="">Select Supplier</option>
+                            {% for supplier in suppliers %}
+                                <option value="{{ supplier.id }}">{{ supplier.name }}</option>
+                            {% endfor %}
+                        </select>
+                        <button type="submit">Assign</button>
+                    </form>
+                    {% else %}
+                        <span style="color: green;">Assigned</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="6">No orders found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

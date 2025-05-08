@@ -1,0 +1,54 @@
+<!-- templates/admin_dashboard.html -->
+{% extends 'accounts/admin_base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+    <div class="cards">
+        <div class="card" style="background: #007bff;">
+            <i class="fas fa-shopping-cart fa-2x"></i>
+            <h3>0</h3>
+            <p>Order</p>
+        </div>
+        <div class="card" style="background: #28a745;">
+            <i class="fas fa-list fa-2x"></i>
+            <h3>0</h3>
+            <p>Product</p>
+        </div>
+        <div class="card" style="background: #dc3545;">
+            <i class="fas fa-user fa-2x"></i>
+            <h3>0</h3>
+            <p>Supplier</p>
+        </div>
+        <div class="card" style="background: #e83e8c;">
+            <i class="fas fa-users fa-2x"></i>
+            <h3>0</h3>
+            <p>Buyer</p>
+        </div>
+    </div>
+
+    <div class="orders-table">
+        <h2>Orders</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Supplier</th>
+                    <th>Product</th>
+                    <th>Design</th>
+                    <th>Color</th>
+                    <th>Buyer</th>
+                    <th>Season</th>
+                    <th>Category</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="10">No Order Data</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

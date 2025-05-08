@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Welcome Email</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color: #f9f9f9; padding: 20px;">
+    <div style="max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px;">
+        <h2 style="color: #4CAF50;">Welcome, {{ buyer.full_name }}!</h2>
+        <p>Thank you for joining our Inventory Management System.</p>
+        <p><strong>Login Details:</strong></p>
+        <ul>
+            <li><strong>Email:</strong> {{ buyer.email }}</li>
+            <li><strong>Username:</strong> {{ buyer.username }}</li>
+            <li><strong>Password:</strong> {{ plain_password }}</li>
+        </ul>
+        <p style="margin-top: 20px;">Please change your password after your first login for security reasons.</p>
+
+        <p style="text-align: center;">
+            <a href="{{ login_url }}" style="padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">
+                Login to Your Account
+            </a>
+        </p>
+
+        <p>Best Regards,<br>Inventory Management Team</p>
+    </div>
+</body>
+</html>

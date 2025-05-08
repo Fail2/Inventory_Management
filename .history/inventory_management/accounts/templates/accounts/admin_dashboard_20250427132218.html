@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            color: #333;
+        }
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 240px;
+            height: 100%;
+            background: #1e1e2d;
+            padding-top: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 22px;
+            color: #fff;
+            letter-spacing: 1px;
+        }
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #c0c0c0;
+            padding: 12px 20px;
+            text-decoration: none;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .sidebar a:hover {
+            background: #34344e;
+            color: #ffffff;
+        }
+        .logout-btn {
+            width: 100%;
+            border: none;
+            background: #e63946;
+            color: white;
+            padding: 12px 20px;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+            margin-top: auto;
+            transition: background 0.3s ease;
+        }
+        .logout-btn:hover {
+            background: #d62828;
+        }
+        .main-content {
+            margin-left: 240px;
+            padding: 30px;
+        }
+        .main-content h1 {
+            margin-bottom: 30px;
+            font-size: 28px;
+            color: #1e1e2d;
+        }
+        .cards {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        .card {
+            flex: 1;
+            min-width: 220px;
+            background: linear-gradient(135deg, #4b6cb7, #182848);
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            color: white;
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card h3 {
+            margin: 15px 0;
+            font-size: 28px;
+        }
+        .card p {
+            font-size: 18px;
+            margin-top: 5px;
+            color: #e0e0e0;
+        }
+        .orders-table {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .orders-table h2 {
+            margin-bottom: 20px;
+            font-size: 24px;
+            color: #1e1e2d;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            font-size: 15px;
+        }
+        th {
+            background: #1e1e2d;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>Inventory Management</h2>
+        <a href="{% url 'admin_dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="#"><i class="fas fa-user"></i> Supplier</a>
+        <a href="#"><i class="fas fa-users"></i> Buyer</a>
+        <a href="#"><i class="fas fa-calendar-alt"></i> Season</a>
+        <a href="#"><i class="fas fa-list"></i> Category</a>
+        <a href="#"><i class="fas fa-box"></i> Product</a>
+        <a href="#"><i class="fas fa-shopping-cart"></i> Order</a>
+        <a href="#"><i class="fas fa-truck"></i> Delivery</a>
+
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </form>
+    </div>
+
+    <div class="main-content">
+        <h1>Welcome to the Admin Dashboard!</h1>
+
+        <div class="cards">
+            <div class="card" style="background: linear-gradient(135deg, #007bff, #0056b3);">
+                <i class="fas fa-shopping-cart fa-2x"></i>
+                <h3>0</h3>
+                <p>Order</p>
+            </div>
+            <div class="card" style="background: linear-gradient(135deg, #28a745, #1c7430);">
+                <i class="fas fa-list fa-2x"></i>
+                <h3>0</h3>
+                <p>Product</p>
+            </div>
+            <div class="card" style="background: linear-gradient(135deg, #dc3545, #a71d2a);">
+                <i class="fas fa-user fa-2x"></i>
+                <h3>0</h3>
+                <p>Supplier</p>
+            </div>
+            <div class="card" style="background: linear-gradient(135deg, #e83e8c, #a3195b);">
+                <i class="fas fa-users fa-2x"></i>
+                <h3>0</h3>
+                <p>Buyer</p>
+            </div>
+        </div>
+
+        <div class="orders-table">
+            <h2>Orders</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Supplier</th>
+                        <th>Product</th>
+                        <th>Design</th>
+                        <th>Color</th>
+                        <th>Buyer</th>
+                        <th>Season</th>
+                        <th>Category</th>
+                        <th>Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="10">No Order Data</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</body>
+</html>

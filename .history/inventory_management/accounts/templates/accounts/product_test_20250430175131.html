@@ -1,0 +1,15 @@
+{% extends 'accounts/admin_base.html' %}
+{% block title %}Product List{% endblock %}
+
+{%block content%}
+
+{%for product in products1%}
+{
+<p1>{{product.name}}</p1> <br>
+<img src="{{ product.image.url|default:'/media/product_images/default-image.jpg' }}"
+alt="{{ product.name }}" class="card-img-top"
+style="width: 100%; object-fit: cover;">
+}
+{%endfor%}
+
+{%endblock%}

@@ -1,0 +1,74 @@
+{% extends 'accounts/admin_base.html' %}
+{% block title %}Delete Product{% endblock %}
+
+{% block content %}
+<div class="delete-container">
+    <div class="delete-card">
+        <h2>Delete Product</h2>
+        <p>Are you sure you want to delete <strong>{{ product.name }}</strong>?</p>
+
+        <form method="POST">
+            {% csrf_token %}
+            <button type="submit" class="btn-delete">Yes, Delete</button>
+            <a href="{% url 'product_list' %}" class="btn-cancel">Cancel</a>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .delete-container {
+        max-width: 600px;
+        margin: 80px auto;
+        padding: 20px;
+    }
+
+    .delete-card {
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        padding: 30px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        text-align: center;
+    }
+
+    .delete-card h2 {
+        color: #c0392b;
+        margin-bottom: 20px;
+    }
+
+    .delete-card p {
+        font-size: 16px;
+        margin-bottom: 30px;
+    }
+
+    .btn-delete {
+        background-color: #e74c3c;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+    .btn-delete:hover {
+        background-color: #c0392b;
+    }
+
+    .btn-cancel {
+        margin-left: 10px;
+        padding: 10px 20px;
+        text-decoration: none;
+        background-color: #aaa;
+        color: white;
+        border-radius: 6px;
+        font-weight: bold;
+    }
+
+    .btn-cancel:hover {
+        background-color: #888;
+    }
+</style>
+{% endblock %}

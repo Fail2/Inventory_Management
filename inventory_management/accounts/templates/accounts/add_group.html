@@ -1,0 +1,15 @@
+{% extends 'accounts/admin_base.html' %}
+
+{% block title %}Add {{ group_by|title }}{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h2>Add {{ group_by|title }}</h2>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a href="{% url 'grouped_product_list' group_by=group_by %}" class="btn btn-secondary">Back</a>
+    </form>
+</div>
+{% endblock %}

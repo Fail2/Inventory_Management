@@ -1,0 +1,32 @@
+<!-- templates/accounts/admin_dashboard.html -->
+{% extends 'accounts/admin_base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<!-- Orders Table -->
+<div class="orders-table">
+    <h2>Orders</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Supplier</th>
+                <th>Product</th>
+                <th>Design</th>
+                <th>Color</th>
+                <th>Buyer</th>
+                <th>Season</th>
+                <th>Category</th>
+                <th>Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td colspan="10">No Order Data</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

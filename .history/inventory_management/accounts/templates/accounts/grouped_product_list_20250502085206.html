@@ -1,0 +1,188 @@
+{% extends 'accounts/admin_base.html' %}
+{% load custom_tags %}
+{% block title %}Products by {{ group_by|title }}{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+<style>
+    .product-container {
+        padding: 20px;
+        box-sizing: border-box;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+    }
+
+    .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+
+    .header h2 {
+        margin: 0;
+        font-size: 24px;
+    }
+
+    .add-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: #007bff;
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-size: 14px;
+        transition: background 0.3s ease;
+    }
+
+    .add-btn:hover {
+        background: #0056b3;
+    }
+
+    .group-section {
+        margin-bottom: 30px;
+    }
+
+    .group-section h3 {
+        margin-bottom: 15px;
+        font-size: 20px;
+        color: #333;
+    }
+
+    .product-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        gap: 20px;
+    }
+
+    .product-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        transition: transform 0.3s ease;
+    }
+
+    .product-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .product-card img {
+        width: 100%;
+        height: 180px;
+        object-fit: cover;
+    }
+
+    .product-card h5 {
+        margin: 10px;
+        font-size: 18px;
+        font-weight: 600;
+    }
+
+    .product-card p {
+        margin: 0 10px 10px;
+        font-size: 14px;
+        opacity: 0.7;
+    }
+
+    .product-card .btn-container {
+        display: flex;
+        gap: 10px;
+        margin: 10px;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 8px 12px;
+        border-radius: 4px;
+        font-size: 14px;
+        text-align: center;
+        text-decoration: none;
+        cursor: pointer;
+        transition: background 0.3s ease;
+        flex: 1;
+    }
+
+    .btn-primary {
+        background: #007bff;
+        color: white;
+    }
+
+    .btn-primary:hover {
+        background: #0056b3;
+    }
+
+    .btn-danger {
+        background: #dc3545;
+        color: white;
+    }
+
+    .btn-danger:hover {
+        background: #a71d2a;
+    }
+
+    @media (max-width: 500px) {
+        .header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 10px;
+        }
+
+        .btn-container {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="product-container">
+    <div class="header">
+        <h2>Products by {{ group_by|title }}</h2>
+        {% if group_by == 'category' %}
+            <a href="{% url 'add_category' %}" class="add-btn">
+                <i class="fas fa-plus"></i> Add Category
+            </a>
+        {% elif group_by == 'season' %}
+            <a href="{% url 'add_season' %}" class="add-btn">
+                <i class="fas fa-plus"></i> Add Season
+            </a>
+        {% endif %}
+    </div>
+    
+
+    {% for group in groups %}
+        <div class="group-section">
+            <h3>{{ group.name }}</h3>
+            <div class="product-grid">
+                {% with products=products_by_group|get_item:group.id %}
+                    {% if products %}
+                        {% for product in products %}
+                            <div class="product-card">
+                                <img src="{{ product.picture.url|default:'/media/product_images/default-image.jpg' }}" alt="{{ product.name }}">
+                                <h5>{{ product.name }}</h5>
+                                <p>Price: ${{ product.price }}</p>
+                                <p>Quantity: {{ product.quantity }}</p>
+                                <div class="btn-container">
+                                    <a href="{% url 'edit_product' product.id %}" class="btn btn-primary">Edit</a>
+                                    <a href="{% url 'delete_product' product.id %}" class="btn btn-danger">Delete</a>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <p>No products under {{ group.name }}.</p>
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+{% endblock %}

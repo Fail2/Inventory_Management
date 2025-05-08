@@ -1,0 +1,22 @@
+{% extends 'accounts/buyer_base.html' %}
+
+{% block content %}
+    <div class="products-container">
+        <div class="products">
+            {% for product in products %}
+            <div class="product">
+                <h3>{{ product.name }}</h3>
+                <p>Price: ${{ product.price }}</p>
+                <p>Stock: {{ product.quantity }}</p>
+                <p>Category: {{ product.category.name }}</p>
+                {% if product.season %}
+                <p>Season: {{ product.season.name }}</p>
+                {% endif %}
+                <a class="buy-btn" href="{% url 'place_order' product.id %}">Buy Now</a>
+            </div>
+            {% empty %}
+            <p style="text-align:center;">No products available right now.</p>
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

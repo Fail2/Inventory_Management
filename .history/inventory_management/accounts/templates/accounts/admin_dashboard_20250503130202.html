@@ -1,0 +1,68 @@
+<!-- templates/accounts/admin_dashboard.html -->
+{% extends 'accounts/admin_base.html' %}
+
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block extra_css %}
+<style>
+    .orders-table {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        padding: 20px;
+        margin-top: 20px;
+    }
+
+    .orders-table h2 {
+        margin-bottom: 15px;
+    }
+
+    .orders-table table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .orders-table thead {
+        background-color: #212529;
+        color: white;
+    }
+
+    .orders-table th, .orders-table td {
+        text-align: center;
+        padding: 10px;
+        border: 1px solid #ddd;
+    }
+
+    .orders-table tbody tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    .orders-table tbody tr:hover {
+        background-color: #f1f1f1;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Orders Table -->
+<div class="orders-table">
+    <h2>Orders</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Product Image</th><th>Product</th>
+                <th>Supplier</th>
+                
+                <th>Buyer</th>
+                <th>Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td colspan="10">No Order Data</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

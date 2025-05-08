@@ -1,0 +1,209 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Admin{% endblock %}</title>
+
+    <!-- Favicon -->
+    <link rel="icon" href="{% static 'favicon.ico' %}" type="image/x-icon">
+
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <!-- Allow extra CSS -->
+    {% block extra_css %}{% endblock %}
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background: #f5f5f5;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 14%;
+            height: 100%;
+            background: #212529;
+            color: white;
+            padding-top: 20px;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #ffffff;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: white;
+            padding: 15px;
+            text-decoration: none;
+            font-size: 16px;
+        }
+
+        .sidebar a:hover {
+            background: #575757;
+        }
+
+        .fixed-cards {
+            position: fixed;
+            margin-top: 0;
+            margin-left: 14%; /* Width of sidebar */
+            height: 15%;
+            width: calc(100% - 14%);
+            background: #f5f5f5;
+            padding: 15px 20px;
+            z-index: 1000;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .cards {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .card {
+            flex: 1;
+            min-width: 180px;
+            max-width: 220px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            color: white;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card i {
+            font-size: 30px;
+            margin-bottom: 10px;
+        }
+
+        .card h3 {
+            margin: 8px 0;
+            font-size: 20px;
+        }
+
+        .card p {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        .main-content {
+            margin-left: 150px;
+            padding: 150px 20px ; /* Padding to push below fixed cards */
+        }
+
+        .orders-table {
+            background: white;
+            width: 100%;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table,
+        th,
+        td {
+            border: 1px solid #ddd;
+        }
+
+        th,
+        td {
+            padding: 8px;
+            text-align: center;
+        }
+
+        th {
+            background: #212529;
+            color: white;
+        }
+
+        .logout-btn {
+            width: 100%;
+            border: none;
+            background: #dc3545;
+            color: white;
+            padding: 15px;
+            font-size: 16px;
+            text-align: left;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="sidebar">
+        <h2>Inventory Management</h2>
+        <a href="{% url 'admin_dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
+        <a href="{% url 'user_list' 'supplier' %}"><i class="fas fa-user"></i> Supplier</a>
+        <a href="{% url 'user_list' 'buyer' %}"><i class="fas fa-users"></i> Buyer</a>
+        <a href="#"><i class="fas fa-calendar-alt"></i> Season</a>
+        <a href="#"><i class="fas fa-list"></i> Category</a>
+        <a href="{% url 'product_list' %}"><i class="fas fa-box"></i> Product</a>
+        <a href="#"><i class="fas fa-shopping-cart"></i> Order</a>
+        <a href="#"><i class="fas fa-truck"></i> Delivery</a>
+        <form method="post" action="{% url 'logout' %}">
+            {% csrf_token %}
+            <button type="submit" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </form>
+    </div>
+
+    <div class="fixed-cards">
+        <div class="cards">
+            <div class="card" style="background: #007bff;">
+                <i class="fas fa-shopping-cart fa-2x"></i>
+                <h3>0</h3>
+                <p>Order</p>
+            </div>
+            <div class="card" style="background: #28a745;">
+                <i class="fas fa-list fa-2x"></i>
+                <h3>0</h3>
+                <p>Product</p>
+            </div>
+            <div class="card" style="background: #dc3545;">
+                <i class="fas fa-user fa-2x"></i>
+                <h3>0</h3>
+                <p>Supplier</p>
+            </div>
+            <div class="card" style="background: #e83e8c;">
+                <i class="fas fa-users fa-2x"></i>
+                <h3>0</h3>
+                <p>Buyer</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <!-- Page-specific content -->
+        {% block content %}
+        {% endblock %}
+    </div>
+
+    <!-- Scripts block (for Bootstrap, etc.) -->
+    {% block scripts %}
+    {% endblock %}
+</body>
+
+</html>

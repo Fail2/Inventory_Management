@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Buyer Home</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f2f2f2;
+            padding: 20px;
+        }
+        .product-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+        .product-card h3 {
+            margin: 0 0 10px;
+        }
+        .order-button {
+            background-color: #28a745;
+            padding: 10px 20px;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <h1>Welcome, {{ request.session.buyer_name }}!</h1>
+    <h2>Available Products</h2>
+
+    {% for product in products %}
+    <div class="product-card">
+        <h3>{{ product.name }}</h3>
+        <p>Price: {{ product.price }}</p>
+        <form method="post" action="{% url 'place_order' product.id %}">
+            {% csrf_token %}
+            <button type="submit" class="order-button">Order</button>
+        </form>
+    </div>
+    {% endfor %}
+
+</body>
+</html>

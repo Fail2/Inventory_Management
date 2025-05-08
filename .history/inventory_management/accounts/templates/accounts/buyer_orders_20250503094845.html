@@ -1,0 +1,38 @@
+{% extends 'accounts/buyer_base.html' %}
+
+{% block title %}Your Orders{% endblock %}
+
+{% block content %}
+<h2>Your Orders</h2>
+
+<table>
+    <thead>
+        <tr>
+            <th>Product Image</th>  <!-- New column for image -->
+            <th>Product</th>
+            <th>Quantity</th>
+            <th>Status</th>
+            <th>Order Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for order in orders %}
+        <tr>
+            <td>
+                <!-- Check if product image exists, then display it, otherwise show a default image -->
+                <img src="{{ order.product.picture.url|default:'/media/product_images/default-image.jpg' }}" alt="{{ order.product.name }}" style="max-width: 100px;">
+            </td>
+            <td>{{ order.product.name }}</td>
+            <td>{{ order.quantity }}</td>
+            <td>{{ order.status }}</td>
+            <td>{{ order.order_date|date:"Y-m-d H:i" }}</td>  <!-- Format order_date -->
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="5">You have no orders.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% endblock %}

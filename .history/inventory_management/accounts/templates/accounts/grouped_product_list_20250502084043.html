@@ -1,0 +1,39 @@
+{% extends 'accounts/admin_base.html' %}
+{% load custom_tags %}
+{% block title %}Products by {{ group_by|title }}{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="header">
+        <h2>Products by {{ group_by|title }}</h2>
+        <a href="{% url 'add_product' %}" class="add-btn">
+            <i class="fas fa-plus"></i> Add Product
+        </a>
+    </div>
+
+    {% for group in groups %}
+        <h3>{{ group.name }}</h3>
+        <div class="product-grid">
+            {% with products=products_by_group|get_item:group.id %}
+                {% if products %}
+                    {% for product in products %}
+                        <div class="product-card">
+                            <img src="{{ product.picture.url|default:'/media/product_images/default-image.jpg' }}" alt="{{ product.name }}">
+                            <h5>{{ product.name }}</h5>
+                            <p>Price: ${{ product.price }}</p>
+                            <p>Quantity: {{ product.quantity }}</p>
+                            <div>
+                                <a href="{% url 'edit_product' product.id %}" class="btn btn-primary">Edit</a>
+                                <a href="{% url 'delete_product' product.id %}" class="btn btn-danger">Delete</a>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <p>No products under {{ group.name }}.</p>
+                {% endif %}
+            {% endwith %}
+        </div>
+        <hr>
+    {% endfor %}
+</div>
+{% endblock %}
