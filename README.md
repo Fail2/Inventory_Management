@@ -1,3 +1,3 @@
 # Inventory Management
-##Project Diagram
+## Project Diagram
 
