@@ -7,11 +7,11 @@
 <style>
     .form-card {
         background-color: #fff;
-        border-radius: 10px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        padding: 40px;
+        border-radius: 14px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        padding: 32px;
         width: 100%;
-        max-width: 500px;
+        max-width: 700px;
         margin: 0 auto;
     }
 
@@ -112,6 +112,15 @@
         background-color: #5a6268;
         box-shadow: 0 4px 12px rgba(108, 117, 125, 0.3);
     }
+
+    .empty-state {
+        padding: 14px 16px;
+        border: 1px dashed #c7c7c7;
+        border-radius: 8px;
+        background: #f8f9fa;
+        color: #6c757d;
+        font-size: 14px;
+    }
 </style>
 {% endblock %}
 
@@ -123,16 +132,44 @@
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {% for field in form %}
-            <div class="form-group">
-                <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
-                {{ field }}
-                {% if field.help_text %}
-                    <div class="form-text">{{ field.help_text }}</div>
+            {% if field.name == 'category' %}
+                {% if category_count > 0 %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <div class="form-text">{{ field.help_text }}</div>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
                 {% endif %}
-                {% for error in field.errors %}
-                    <div class="text-danger">{{ error }}</div>
-                {% endfor %}
-            </div>
+            {% elif field.name == 'season' %}
+                {% if season_count > 0 %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <div class="form-text">{{ field.help_text }}</div>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <div class="form-text">{{ field.help_text }}</div>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div class="text-danger">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
         {% endfor %}
         <div class="button-group">
             <button type="submit" class="btn btn-success">Save</button>

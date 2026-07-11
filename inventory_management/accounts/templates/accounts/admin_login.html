@@ -33,13 +33,7 @@
                         <a href="{% url 'login' %}">Login as Buyer/Seller</a>
                     </p>
 
-                    {% if messages %}
-                        {% for message in messages %}
-                            <div class="alert alert-danger mt-2" role="alert">
-                                {{ message }}
-                            </div>
-                        {% endfor %}
-                    {% endif %}
+                    {% include 'accounts/partials/messages.html' %}
                 </div>
             </div>
         </div>

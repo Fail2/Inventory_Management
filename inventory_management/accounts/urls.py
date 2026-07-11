@@ -17,7 +17,10 @@ urlpatterns = [
     path('products/<int:product_id>/edit/', views.edit_product, name='edit_product'),
     path('products/<int:product_id>/delete/', views.delete_product, name='delete_product'),
     path('products/by/<str:group_by>/', views.grouped_product_list, name='grouped_product_list'),
+    path('manage/<str:group_by>/', views.manage_group, name='manage_group'),
     path('add/<str:group_by>/', views.add_group, name='add_group'),
+    path('edit/<str:group_by>/<int:group_id>/', views.edit_group, name='edit_group'),
+    path('delete/<str:group_by>/<int:group_id>/', views.delete_group, name='delete_group'),
     path('admin/orders/', views.admin_order_list, name='admin_order_list'),
 
 

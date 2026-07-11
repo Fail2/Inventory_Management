@@ -10,16 +10,44 @@
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         {% for field in form %}
-            <div class="form-group">
-                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {{ field }}
-                {% if field.help_text %}
-                    <small class="help-text">{{ field.help_text }}</small>
+            {% if field.name == 'category' %}
+                {% if category_count > 0 %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                </div>
                 {% endif %}
-                {% for error in field.errors %}
-                    <div class="error-message">{{ error }}</div>
-                {% endfor %}
-            </div>
+            {% elif field.name == 'season' %}
+                {% if season_count > 0 %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="form-group">
+                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                    {{ field }}
+                    {% if field.help_text %}
+                        <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
+                    {% for error in field.errors %}
+                        <div class="error-message">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
         {% endfor %}
         <div class="form-actions">
             <button type="submit" class="btn submit-btn">Save Changes</button>
@@ -32,13 +60,12 @@
 <style>
     /* Container styling */
     .form-container {
-        max-width: 600px;
-        margin: 5px auto;
+        max-width: 700px;
+        margin: 0 auto;
         padding: 30px;
         background-color: #ffffff;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border-radius: 14px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
         font-family: Arial, sans-serif;
     }
 
@@ -113,6 +140,15 @@
         border: none;
         border-radius: 4px;
         cursor: pointer;
+    }
+
+    .empty-state {
+        padding: 10px 12px;
+        border: 1px dashed #c7c7c7;
+        border-radius: 6px;
+        background: #f8f9fa;
+        color: #6c757d;
+        font-size: 13px;
     }
 
     .submit-btn {

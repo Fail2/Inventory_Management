@@ -3,7 +3,6 @@
 
 {% block content %}
 <div class="product-container">
-    <!-- Header -->
     <div class="header">
         <h2>Product List</h2>
         <a href="{% url 'add_product' %}" class="add-btn">
@@ -11,17 +10,47 @@
         </a>
     </div>
 
-    <!-- Product Grid -->
+    <form method="get" class="filter-bar">
+        <input type="text" name="q" value="{{ query }}" placeholder="Search products" class="filter-input">
+        <select name="category" class="filter-select">
+            <option value="">All categories</option>
+            {% for category in categories %}
+            <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:'s' %}selected{% endif %}>{{ category.name }}</option>
+            {% endfor %}
+        </select>
+        <select name="season" class="filter-select">
+            <option value="">All seasons</option>
+            {% for season in seasons %}
+            <option value="{{ season.id }}" {% if selected_season == season.id|stringformat:'s' %}selected{% endif %}>{{ season.name }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn btn-primary">Apply</button>
+        <a href="{% url 'product_list' %}" class="btn btn-secondary">Reset</a>
+    </form>
+
     <div class="product-grid">
-        {% for product in pro %}
+        {% for product in products %}
         <div class="product-card">
             <div class="product-image">
-                <img src="{{ product.picture.url|default:'/media/product_images/default-image.jpg' }}" alt="{{ product.name }}">
+                {% if product.picture %}
+                <img src="{{ product.picture.url }}" alt="{{ product.name }}">
+                {% else %}
+                <img src="/media/product_images/default-image.jpg" alt="{{ product.name }}">
+                {% endif %}
             </div>
             <div class="product-info">
-                <h5>{{ product.name }}</h5>
-                <p>Price: ${{ product.price }}</p>
-                <p>Quantity: {{ product.quantity }}</p>
+                <div class="product-title-row">
+                    <h5>{{ product.name }}</h5>
+                    {% if product.quantity <= 5 %}
+                    <span class="stock-badge low">Low</span>
+                    {% else %}
+                    <span class="stock-badge in-stock">In stock</span>
+                    {% endif %}
+                </div>
+                <p><strong>Category:</strong> {{ product.category.name|default:'Uncategorized' }}</p>
+                <p><strong>Season:</strong> {{ product.season.name|default:'—' }}</p>
+                <p><strong>Price:</strong> ${{ product.price }}</p>
+                <p><strong>Quantity:</strong> {{ product.quantity }}</p>
                 <div class="action-buttons">
                     <a href="{% url 'edit_product' product.id %}" class="btn btn-primary">Edit</a>
                     <a href="{% url 'delete_product' product.id %}" class="btn btn-danger">Delete</a>
@@ -29,7 +58,7 @@
             </div>
         </div>
         {% empty %}
-        <p>No products available.</p>
+        <p class="empty-state">No products match your current filters.</p>
         {% endfor %}
     </div>
 </div>
@@ -82,6 +111,42 @@
         background: #0056b3;
     }
 
+    .filter-bar {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+        padding: 12px;
+        border: 1px solid #e5e7eb;
+        border-radius: 10px;
+        background: #f8fafc;
+    }
+
+    .filter-input, .filter-select {
+        padding: 8px 10px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        min-width: 160px;
+    }
+
+    .btn-secondary {
+        background: #e5e7eb;
+        color: #111827;
+    }
+
+    .btn-secondary:hover {
+        background: #d1d5db;
+    }
+
+    .empty-state {
+        grid-column: 1 / -1;
+        padding: 20px;
+        border: 1px dashed #cbd5e1;
+        border-radius: 10px;
+        text-align: center;
+        color: #64748b;
+    }
+
     /* Product Grid */
     .product-grid {
         display: grid;
@@ -128,6 +193,33 @@
         margin: 0;
         font-size: 18px;
         font-weight: 600;
+    }
+
+    .product-title-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .stock-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.4px;
+    }
+
+    .stock-badge.low {
+        background: #fff4e5;
+        color: #b45309;
+    }
+
+    .stock-badge.in-stock {
+        background: #e9f7ef;
+        color: #1f7a3d;
     }
 
     .product-info p {

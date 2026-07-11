@@ -1,0 +1,116 @@
+{% if messages %}
+<style>
+    .message-stack {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        max-width: 360px;
+        pointer-events: none;
+    }
+
+    .message-toast {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 14px 16px;
+        border-radius: 10px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.16);
+        color: #fff;
+        font-size: 14px;
+        line-height: 1.4;
+        background: #333;
+        pointer-events: auto;
+        animation: slideIn 0.25s ease;
+        transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+
+    .message-toast.hide {
+        opacity: 0;
+        transform: translateX(20px);
+    }
+
+    .message-toast.success {
+        background: linear-gradient(135deg, #28a745, #1e7e34);
+    }
+
+    .message-toast.warning {
+        background: linear-gradient(135deg, #ffc107, #d39e00);
+        color: #222;
+    }
+
+    .message-toast.error {
+        background: linear-gradient(135deg, #dc3545, #b02a37);
+    }
+
+    .message-toast.info {
+        background: linear-gradient(135deg, #17a2b8, #117a8b);
+    }
+
+    .message-content {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .message-title {
+        font-weight: 700;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+    }
+
+    .message-close {
+        border: none;
+        background: transparent;
+        color: inherit;
+        font-size: 18px;
+        cursor: pointer;
+        padding: 0;
+        line-height: 1;
+        opacity: 0.8;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateX(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateX(0);
+        }
+    }
+</style>
+
+<div class="message-stack" aria-live="polite" aria-atomic="true">
+    {% for message in messages %}
+    <div class="message-toast {{ message.tags|default:'info' }}" role="alert">
+        <div class="message-content">
+            <span class="message-title">
+                {% if message.tags == 'success' %}Success{% elif message.tags == 'warning' %}Warning{% elif message.tags == 'error' %}Error{% else %}Notice{% endif %}
+            </span>
+            <span>{{ message }}</span>
+        </div>
+        <button type="button" class="message-close" aria-label="Close" onclick="this.parentElement.classList.add('hide'); setTimeout(() => this.parentElement.remove(), 250);">×</button>
+    </div>
+    {% endfor %}
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        document.querySelectorAll('.message-toast').forEach(function (toast) {
+            setTimeout(function () {
+                toast.classList.add('hide');
+                setTimeout(function () {
+                    toast.remove();
+                }, 250);
+            }, 4000);
+        });
+    });
+</script>
+{% endif %}

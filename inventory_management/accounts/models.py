@@ -1,3 +1,5 @@
+from decimal import Decimal, InvalidOperation
+
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator
@@ -114,7 +116,12 @@ class Order(models.Model):
 
     def save(self, *args, **kwargs):
         if self.product and self.quantity:
-            self.total_amount = self.product.price * self.quantity
+            try:
+                price = self.product.price if self.product.price is not None else Decimal('0.00')
+                quantity = Decimal(self.quantity)
+                self.total_amount = price * quantity
+            except (InvalidOperation, TypeError, ValueError):
+                self.total_amount = None
         super().save(*args, **kwargs)
 
 class Delivery(models.Model):

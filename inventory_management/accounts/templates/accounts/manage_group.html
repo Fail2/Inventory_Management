@@ -1,16 +1,15 @@
 {% extends 'accounts/admin_base.html' %}
-
-{% block title %}{{ title }}{% endblock %}
+{% block title %}Manage {{ group_by|title }}{% endblock %}
 
 {% block content %}
 <div class="page-shell">
     <div class="page-header">
         <div>
-            <h2>{{ title }}</h2>
-            <p>Manage {{ user_type|capfirst }} records from one place.</p>
+            <h2>Manage {{ group_by|title }}</h2>
+            <p>Create, edit, and remove {{ group_by }} entries from one place.</p>
         </div>
-        <a href="{% url 'add_user' user_type %}" class="add-btn">
-            <i class="fas fa-plus"></i> Add {{ user_type|capfirst }}
+        <a href="{% url 'add_group' group_by %}" class="add-btn">
+            <i class="fas fa-plus"></i> Add {{ group_by|title }}
         </a>
     </div>
 
@@ -19,23 +18,19 @@
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>Email</th>
-                    <th>Address</th>
                     <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
-                {% for user in users %}
+                {% for group in groups %}
                 <tr>
-                    <td>{{ user.full_name }}</td>
-                    <td>{{ user.email }}</td>
-                    <td>{{ user.address|truncatechars:30 }}</td>
+                    <td>{{ group.name }}</td>
                     <td>
                         <div class="action-group">
-                            <a href="{% url 'edit_user' user_type user.id %}" class="icon-btn edit-btn">
+                            <a href="{% url 'edit_group' group_by group.id %}" class="icon-btn edit-btn">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <a href="{% url 'delete_user' user_type user.id %}" class="icon-btn delete-btn">
+                            <a href="{% url 'delete_group' group_by group.id %}" class="icon-btn delete-btn">
                                 <i class="fas fa-trash"></i>
                             </a>
                         </div>
@@ -43,7 +38,7 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="4" class="empty-state">No {{ user_type }}s found.</td>
+                    <td colspan="2" class="empty-state">No {{ group_by }} entries found.</td>
                 </tr>
                 {% endfor %}
             </tbody>

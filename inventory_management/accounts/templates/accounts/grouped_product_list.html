@@ -5,32 +5,39 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 <style>
 
+    .page-shell { width: 100%; }
+
     .header {
         display: flex;
         justify-content: space-between;
         align-items: center;
         flex-wrap: wrap;
-        margin-bottom: 5px;
+        margin-bottom: 16px;
+        gap: 12px;
     }
 
     .header h2 {
         margin: 0;
         font-size: 24px;
-        color: #333;
+        color: #0f172a;
+    }
+
+    .header p {
+        margin: 4px 0 0;
+        color: #64748b;
     }
 
     .add-btn {
         display: inline-flex;
         align-items: center;
         gap: 8px;
-        background: #007bff;
+        background: #2563eb;
         color: white;
         padding: 10px 15px;
-        border-radius: 5px;
+        border-radius: 8px;
         text-decoration: none;
         font-size: 14px;
         transition: background 0.3s ease;
-        margin-top: 10px;
     }
 
     .add-btn:hover {
@@ -38,7 +45,7 @@
     }
 
     .dropdown-container {
-        margin: 10px 0 30px 0;
+        margin: 0 0 24px 0;
     }
 
     .dropdown-container form {
@@ -46,11 +53,12 @@
     }
 
     .dropdown-container select {
-        padding: 10px;
-        font-size: 16px;
-        border-radius: 5px;
-        border: 1px solid #ccc;
-        min-width: 200px;
+        padding: 10px 12px;
+        font-size: 15px;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        min-width: 220px;
+        background: #fff;
     }
 
     .product-grid {
@@ -61,8 +69,8 @@
 
     .product-card {
         background: white;
-        border-radius: 10px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
         overflow: hidden;
         display: flex;
         flex-direction: column;
@@ -140,20 +148,29 @@
 
     .pagination a {
         padding: 8px 12px;
-        background-color: #007bff;
+        background-color: #2563eb;
         color: white;
-        border-radius: 4px;
+        border-radius: 6px;
         text-decoration: none;
         transition: background 0.3s ease;
     }
 
     .pagination a:hover {
-        background-color: #0056b3;
+        background-color: #1d4ed8;
     }
 
     .pagination span {
         font-size: 14px;
         color: #333;
+    }
+
+    .empty-state {
+        padding: 20px;
+        border: 1px dashed #cbd5e1;
+        border-radius: 10px;
+        text-align: center;
+        color: #64748b;
+        background: #f8fafc;
     }
 
     @media (max-width: 500px) {
@@ -175,61 +192,68 @@
 {% endblock %}
 
 {% block content %}
-<div class="header">
-    <h2>Products by {{ group_by|title }}</h2>
-    {% if group_by == 'category' %}
-        <a href="{% url 'add_group' 'category' %}" class="add-btn">
-            <i class="fas fa-plus"></i> Add Category
-        </a>
-    {% elif group_by == 'season' %}
-        <a href="{% url 'add_group' 'season' %}" class="add-btn">
-            <i class="fas fa-plus"></i> Add Season
-        </a>
+<div class="page-shell">
+    <div class="header">
+        <div>
+            <h2>Products by {{ group_by|title }}</h2>
+            <p>Browse inventory grouped by your {{ group_by }} setup.</p>
+        </div>
+        {% if group_by == 'category' %}
+            <a href="{% url 'manage_group' 'category' %}" class="add-btn">
+                <i class="fas fa-cog"></i> Manage Category
+            </a>
+        {% elif group_by == 'season' %}
+            <a href="{% url 'manage_group' 'season' %}" class="add-btn">
+                <i class="fas fa-cog"></i> Manage Season
+            </a>
+        {% endif %}
+    </div>
+
+    {% if groups.exists %}
+    <div class="dropdown-container">
+        <form method="get">
+            <select name="group_id" onchange="this.form.submit()">
+                {% for group in groups %}
+                    <option value="{{ group.id }}" {% if selected_group and group.id == selected_group.id %}selected{% endif %}>
+                        {{ group.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
     {% endif %}
-</div>
 
-<div class="dropdown-container">
-    <form method="get">
-        <select name="group_id" onchange="this.form.submit()">
-            {% for group in groups %}
-                <option value="{{ group.id }}" {% if selected_group and group.id == selected_group.id %}selected{% endif %}>
-                    {{ group.name }}
-                </option>
-            {% endfor %}
-        </select>
-    </form>
-</div>
-
-{% if products %}
-    <div class="product-grid">
-        {% for product in products %}
-            <div class="product-card">
-                <img src="{{ product.picture.url|default:'/media/product_images/default-image.jpg' }}" alt="{{ product.name }}">
-                <div class="product-card-content">
-                    <h5>{{ product.name }}</h5>
-                    <p>Price: ${{ product.price }}</p>
-                    <p>Quantity: {{ product.quantity }}</p>
-                    <div class="btn-container">
-                        <a href="{% url 'edit_product' product.id %}" class="btn btn-primary">Edit</a>
-                        <a href="{% url 'delete_product' product.id %}" class="btn btn-danger">Delete</a>
+    {% if products %}
+        <div class="product-grid">
+            {% for product in products %}
+                <div class="product-card">
+                    <img src="{{ product.picture.url|default:'/media/product_images/default-image.jpg' }}" alt="{{ product.name }}">
+                    <div class="product-card-content">
+                        <h5>{{ product.name }}</h5>
+                        <p><strong>Price:</strong> ${{ product.price }}</p>
+                        <p><strong>Quantity:</strong> {{ product.quantity }}</p>
+                        <div class="btn-container">
+                            <a href="{% url 'edit_product' product.id %}" class="btn btn-primary">Edit</a>
+                            <a href="{% url 'delete_product' product.id %}" class="btn btn-danger">Delete</a>
+                        </div>
                     </div>
                 </div>
-            </div>
-        {% endfor %}
-    </div>
+            {% endfor %}
+        </div>
 
-    <div class="pagination">
-        {% if products.has_previous %}
-            <a href="?group_id={{ selected_group.id }}&page={{ products.previous_page_number }}"><i class="fas fa-chevron-left"></i> Previous</a>
-        {% endif %}
+        <div class="pagination">
+            {% if products.has_previous %}
+                <a href="?group_id={{ selected_group.id }}&page={{ products.previous_page_number }}"><i class="fas fa-chevron-left"></i> Previous</a>
+            {% endif %}
 
-        <span>Page {{ products.number }} of {{ products.paginator.num_pages }}</span>
+            <span>Page {{ products.number }} of {{ products.paginator.num_pages }}</span>
 
-        {% if products.has_next %}
-            <a href="?group_id={{ selected_group.id }}&page={{ products.next_page_number }}">Next <i class="fas fa-chevron-right"></i></a>
-        {% endif %}
-    </div>
-{% else %}
-    <p style="text-align:center; margin-top: 30px;">No products under this {{ group_by }}.</p>
-{% endif %}
+            {% if products.has_next %}
+                <a href="?group_id={{ selected_group.id }}&page={{ products.next_page_number }}">Next <i class="fas fa-chevron-right"></i></a>
+            {% endif %}
+        </div>
+    {% else %}
+        <div class="empty-state">First add {{ group_by }}.</div>
+    {% endif %}
+</div>
 {% endblock %}

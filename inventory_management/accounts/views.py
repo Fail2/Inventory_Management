@@ -44,10 +44,24 @@ def admin_login_view(request):
 #admin-dashboard
 @login_required(login_url='admin-login')  # Redirect to admin-login if not logged in
 def admin_dashboard(request):
-    orders = Order.objects.all().order_by('-order_date')
-    if not request.user.is_superuser:  # Check if the user is an admin
-        return redirect('admin-login')  # If not admin, redirect to login page
-    return render(request, 'accounts/admin_dashboard.html', {'orders': orders})
+    if not request.user.is_superuser:
+        return redirect('admin-login')
+
+    orders = Order.objects.select_related('buyer', 'product', 'supplier').all().order_by('-order_date')[:6]
+    pending_orders = Order.objects.filter(status='pending').count()
+    product_count = Product.objects.count()
+    supplier_count = Supplier.objects.count()
+    buyer_count = Buyer.objects.count()
+    low_stock_products = Product.objects.filter(quantity__lte=5).order_by('quantity')[:5]
+
+    return render(request, 'accounts/admin_dashboard.html', {
+        'orders': orders,
+        'order_count': pending_orders,
+        'product_count': product_count,
+        'supplier_count': supplier_count,
+        'buyer_count': buyer_count,
+        'low_stock_products': low_stock_products,
+    })
 
 
 # Common List View (Buyer/Supplier)
@@ -187,8 +201,29 @@ def delete_user(request, user_type, user_id):
 #product_list
 @login_required(login_url='admin-login')
 def product_list(request):
-    products = Product.objects.all()
-    return render(request, 'accounts/product_list.html', {'pro': products})
+    products = Product.objects.select_related('category', 'season', 'supplier').all()
+    query = request.GET.get('q', '').strip()
+    category_id = request.GET.get('category', '')
+    season_id = request.GET.get('season', '')
+
+    if query:
+        products = products.filter(name__icontains=query)
+    if category_id:
+        products = products.filter(category_id=category_id)
+    if season_id:
+        products = products.filter(season_id=season_id)
+
+    categories = Category.objects.all()
+    seasons = Season.objects.all()
+
+    return render(request, 'accounts/product_list.html', {
+        'products': products,
+        'categories': categories,
+        'seasons': seasons,
+        'query': query,
+        'selected_category': category_id,
+        'selected_season': season_id,
+    })
 
 #add-product
 # Ensure user is logged in
@@ -203,7 +238,15 @@ def add_product(request):
     else:
         form = ProductForm()
 
-    return render(request, 'accounts/add_product.html', {'form': form, 'title': 'Add Product'})
+    category_count = Category.objects.count()
+    season_count = Season.objects.count()
+
+    return render(request, 'accounts/add_product.html', {
+        'form': form,
+        'title': 'Add Product',
+        'category_count': category_count,
+        'season_count': season_count,
+    })
 
 
 #edit_product
@@ -219,7 +262,14 @@ def edit_product(request, product_id):
     else:
         form = ProductForm(instance=product)
 
-    return render(request, 'accounts/product_edit.html', {'form': form})
+    category_count = Category.objects.count()
+    season_count = Season.objects.count()
+
+    return render(request, 'accounts/product_edit.html', {
+        'form': form,
+        'category_count': category_count,
+        'season_count': season_count,
+    })
 #delete-product
 @login_required(login_url='admin-login')
 def delete_product(request, product_id):
@@ -280,58 +330,139 @@ def grouped_product_list(request, group_by):
         'products': paginated_products,
     })
 
-#add category/season
+#manage category/season
+@login_required(login_url='admin-login')
+def manage_group(request, group_by):
+    if group_by not in ['category', 'season']:
+        messages.error(request, 'Invalid group type.')
+        return redirect('admin_dashboard')
+
+    if group_by == 'category':
+        groups = Category.objects.all().order_by('name')
+        model_class = Category
+    else:
+        groups = Season.objects.all().order_by('name')
+        model_class = Season
+
+    return render(request, 'accounts/manage_group.html', {
+        'group_by': group_by,
+        'groups': groups,
+        'model_class': model_class,
+    })
+
+
 @login_required(login_url='admin-login')
 def add_group(request, group_by):
     if group_by not in ['category', 'season']:
         messages.error(request, 'Invalid group type.')
-        return redirect('grouped_product_list', group_by=group_by)
+        return redirect('admin_dashboard')
 
     if request.method == 'POST':
         form = DynamicGroupForm(request.POST, group_by=group_by)
         if form.is_valid():
             form.save()
             messages.success(request, f'{group_by.capitalize()} added successfully!')
-            return redirect('grouped_product_list', group_by=group_by)
+            return redirect('manage_group', group_by=group_by)
     else:
         form = DynamicGroupForm(group_by=group_by)
 
     return render(request, 'accounts/add_group.html', {
         'form': form,
         'group_by': group_by,
+        'is_manage': True,
+    })
+
+
+@login_required(login_url='admin-login')
+def edit_group(request, group_by, group_id):
+    if group_by not in ['category', 'season']:
+        messages.error(request, 'Invalid group type.')
+        return redirect('admin_dashboard')
+
+    if group_by == 'category':
+        model_class = Category
+    else:
+        model_class = Season
+
+    group = get_object_or_404(model_class, id=group_id)
+
+    if request.method == 'POST':
+        form = DynamicGroupForm(request.POST, group_by=group_by)
+        if form.is_valid():
+            group.name = form.cleaned_data['name']
+            group.save()
+            messages.success(request, f'{group_by.capitalize()} updated successfully!')
+            return redirect('manage_group', group_by=group_by)
+    else:
+        form = DynamicGroupForm(initial={'name': group.name}, group_by=group_by)
+
+    return render(request, 'accounts/add_group.html', {
+        'form': form,
+        'group_by': group_by,
+        'group': group,
+        'is_manage': True,
+    })
+
+
+@login_required(login_url='admin-login')
+def delete_group(request, group_by, group_id):
+    if group_by not in ['category', 'season']:
+        messages.error(request, 'Invalid group type.')
+        return redirect('admin_dashboard')
+
+    if group_by == 'category':
+        model_class = Category
+    else:
+        model_class = Season
+
+    group = get_object_or_404(model_class, id=group_id)
+
+    if request.method == 'POST':
+        group.delete()
+        messages.success(request, f'{group_by.capitalize()} deleted successfully!')
+        return redirect('manage_group', group_by=group_by)
+
+    return render(request, 'accounts/delete_group.html', {
+        'group': group,
+        'group_by': group_by,
     })
 
 #admin_order_list
 @login_required(login_url='admin-login')
 def admin_order_list(request):
-    orders = Order.objects.all().order_by('-order_date')
+    orders = Order.objects.select_related('buyer', 'product', 'supplier').all().order_by('-order_date')
     suppliers = Supplier.objects.all()
     status_choices = Order.STATUS_CHOICES
+    selected_status = request.GET.get('status', '').strip()
+
+    if selected_status:
+        orders = orders.filter(status=selected_status)
 
     if request.method == 'POST':
         order_id = request.POST.get('order_id')
         order = Order.objects.get(id=order_id)
 
-        # Handle Supplier update
         if 'supplier_id' in request.POST:
             supplier_id = request.POST.get('supplier_id')
             if supplier_id:
                 order.supplier_id = supplier_id
+            else:
+                order.supplier_id = None
             order.save()
 
-        # Handle Status update
         elif 'status' in request.POST:
             status = request.POST.get('status')
             if status:
                 order.status = status
             order.save()
 
-        return redirect('admin_order_list')  # After updating, refresh the page
+        return redirect('admin_order_list')
 
     return render(request, 'accounts/admin_order_list.html', {
         'orders': orders,
         'suppliers': suppliers,
         'status_choices': status_choices,
+        'selected_status': selected_status,
     })
 
 
