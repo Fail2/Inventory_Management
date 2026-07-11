@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: inventory-management
+    env: python
+    region: oregon
+    plan: free
+    branch: main
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn inventory_management.wsgi --log-file -
+    envVars:
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_ALLOWED_HOSTS
+        value: "inventory-management.onrender.com"
+    autoDeploy: true
+    healthCheckPath: "/"
+
+# Optional: add a managed PostgreSQL database service for your app.
+# When Render provisions this database, it will expose DATABASE_URL automatically.
+databases:
+  - name: inventory-management-db
+    engine: postgresql
+    version: "15"
+    region: oregon
+    plan: starter

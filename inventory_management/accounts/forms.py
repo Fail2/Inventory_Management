@@ -26,9 +26,9 @@ class UserForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         model_class = kwargs.pop('model_class', None)
-        super(UserForm, self).__init__(*args, **kwargs)
         if model_class:
             self._meta.model = model_class  # dynamically set model (Buyer/Supplier)
+        super(UserForm, self).__init__(*args, **kwargs)
     
 
     def clean(self):

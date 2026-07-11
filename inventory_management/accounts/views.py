@@ -1,3 +1,5 @@
+import logging
+
 from django.shortcuts import get_object_or_404, redirect, render
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -14,6 +16,8 @@ from django.conf import settings
 from django.contrib.auth.hashers import make_password  #for converting the password to random looking long code
 from django.contrib.auth.hashers import check_password
 from django.core.paginator import Paginator, PageNotAnInteger, EmptyPage
+
+logger = logging.getLogger(__name__)
 
 # Admin Login
 def admin_login_view(request):
@@ -103,12 +107,17 @@ def add_user(request, user_type):
             html_content = render_to_string('accounts/user_email_template.html', context)
             email_message = EmailMultiAlternatives(subject, '', from_email, to_email)
             email_message.attach_alternative(html_content, "text/html")
-            result = email_message.send()
 
-            if result == 1:
-                messages.success(request, f'{user_type.capitalize()} added and email sent successfully!')
+            try:
+                result = email_message.send()
+            except Exception as exc:
+                logger.exception("Failed to send welcome email to %s", user.email)
+                messages.warning(request, f'{user_type.capitalize()} added successfully, but the welcome email could not be sent.')
             else:
-                messages.warning(request, f'{user_type.capitalize()} added but email could not be sent.')
+                if result == 1:
+                    messages.success(request, f'{user_type.capitalize()} added and email sent successfully!')
+                else:
+                    messages.warning(request, f'{user_type.capitalize()} added but email could not be sent.')
 
             return redirect('user_list', user_type=user_type)
     else:
