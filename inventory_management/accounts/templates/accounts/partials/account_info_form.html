@@ -1,0 +1,11 @@
+<form data-account-info-form>
+    <label>Full Name</label>
+    {{ form.full_name }}
+    {{ form.full_name.errors }}
+    <label>Email</label>
+    <input type="email" value="{{ email }}" disabled>
+    <label>Address</label>
+    {{ form.address }}
+    {{ form.address.errors }}
+    <button type="submit">Save Changes</button>
+</form>

@@ -144,27 +144,38 @@
             position: relative;
         }
 
-        .nav-dropdown summary {
+        /* small invisible bridge so the mouse doesn't "leave" the dropdown
+           while moving from the trigger down into the menu */
+        .nav-dropdown::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 100%;
+            height: 8px;
+        }
+
+        .nav-dropdown-trigger {
             list-style: none;
             cursor: pointer;
             color: #334155;
             padding: 8px 12px;
             font-size: 14px;
             border-radius: 999px;
+            border: none;
+            background: none;
+            font-family: inherit;
             transition: background 0.2s ease, color 0.2s ease;
         }
 
-        .nav-dropdown summary::-webkit-details-marker {
-            display: none;
-        }
-
-        .nav-dropdown summary:hover,
-        .nav-dropdown[open] summary {
+        .nav-dropdown-trigger:hover,
+        .nav-dropdown.open .nav-dropdown-trigger {
             background: #f1f5f9;
             color: #111827;
         }
 
         .nav-dropdown-menu {
+            display: none;
             position: absolute;
             top: calc(100% + 8px);
             left: 0;
@@ -176,10 +187,14 @@
             min-width: 180px;
             max-height: 320px;
             overflow-y: auto;
-            display: flex;
             flex-direction: column;
             gap: 2px;
             z-index: 1000;
+        }
+
+        .nav-dropdown:hover .nav-dropdown-menu,
+        .nav-dropdown.open .nav-dropdown-menu {
+            display: flex;
         }
 
         .nav-dropdown-menu a {
@@ -244,16 +259,21 @@
             position: relative;
         }
 
-        .account-menu summary {
-            list-style: none;
+        .account-menu::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 100%;
+            height: 8px;
+        }
+
+        .account-menu-trigger {
             cursor: pointer;
         }
 
-        .account-menu summary::-webkit-details-marker {
-            display: none;
-        }
-
         .account-dropdown {
+            display: none;
             position: absolute;
             top: calc(100% + 8px);
             right: 0;
@@ -266,21 +286,105 @@
             z-index: 1000;
         }
 
+        .account-menu:hover .account-dropdown,
+        .account-menu.open .account-dropdown {
+            display: block;
+        }
+
         .account-dropdown p {
             margin: 0 0 12px;
             font-size: 14px;
             color: #334155;
         }
 
+        .account-dropdown-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .account-dropdown .btn-my-info,
         .account-dropdown .btn-logout {
             width: 100%;
             padding: 8px 12px;
             border-radius: 999px;
             border: none;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+        }
+
+        .account-dropdown .btn-my-info {
+            background: #f1f5f9;
+            color: #111827;
+        }
+
+        .account-dropdown .btn-my-info:hover {
+            background: #e2e8f0;
+        }
+
+        .account-dropdown .btn-logout {
             background: #ef4444;
+            color: white;
+        }
+
+        .account-info-panel {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #e2e8f0;
+        }
+
+        .account-info-panel label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 4px;
+        }
+
+        .account-info-panel input,
+        .account-info-panel textarea {
+            width: 100%;
+            padding: 8px 10px;
+            margin-bottom: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 13px;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+
+        .account-info-panel input:disabled {
+            background: #f1f5f9;
+            color: #64748b;
+        }
+
+        .account-info-panel button {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: none;
+            background: #111827;
             color: white;
             font-weight: 700;
             cursor: pointer;
+            font-size: 13px;
+        }
+
+        .account-info-panel .errorlist {
+            color: #dc2626;
+            font-size: 12px;
+            margin: -6px 0 8px;
+            padding-left: 14px;
+        }
+
+        .account-info-success {
+            color: #16a34a;
+            font-size: 13px;
+            font-weight: 600;
+            text-align: center;
+            margin: 0;
         }
 
         .main-content {
@@ -346,6 +450,16 @@
                 border: none;
                 margin-left: 12px;
                 max-height: none;
+            }
+
+            .main-content {
+                padding: 82px 16px 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .product-grid {
+                gap: 12px;
             }
         }
 
@@ -451,46 +565,138 @@
             font-size: 13px;
         }
 
+        .modal-alert {
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 13px;
+            margin-bottom: 16px;
+        }
+
+        .modal-alert.error {
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .modal-alert.warning {
+            background: #fffbeb;
+            color: #92400e;
+        }
+
+        .modal-alert.success {
+            background: #ecfdf3;
+            color: #166534;
+        }
+
+        /* Shared responsive product grid: 2 columns on small screens, 3 on medium, 5 on large */
+        .product-grid {
+            display: grid;
+            gap: 16px;
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        @media (min-width: 768px) {
+            .product-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+
+        @media (min-width: 1200px) {
+            .product-grid { grid-template-columns: repeat(5, 1fr); }
+        }
+
         /* Shared product card component (used on the storefront and product detail's related products) */
         .product-card {
             background: white;
             border-radius: 18px;
             padding: 16px;
-            box-shadow: 0 10px 25px rgba(15,23,42,0.06);
+            box-shadow: 0 8px 20px rgba(15,23,42,0.05);
             border: 1px solid #e2e8f0;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
+            transition: box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 16px 34px rgba(15,23,42,0.1);
+            transform: translateY(-3px);
+        }
+
+        .product-image-wrap {
+            width: 100%;
+            height: 180px;
+            border-radius: 14px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            overflow: hidden;
+            flex-shrink: 0;
         }
 
         .product-card img {
             width: 100%;
-            height: 180px;
+            height: 100%;
             object-fit: contain;
-            border-radius: 14px;
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
+            transition: transform 0.35s ease;
         }
 
+        .product-image-wrap:hover img {
+            transform: scale(1.08);
+        }
+
+        /* Fixed-height name block (exactly 2 lines) so cards align in a grid
+           regardless of how long each product's name is. */
         .product-card h3 {
             margin: 0;
-            font-size: 16px;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            line-height: 1.35;
+            height: 2.7em;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            color: #111827;
         }
 
         .product-link {
+            flex: 1;
             text-decoration: none;
             color: inherit;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 12px;
         }
 
+        .product-card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: auto;
+        }
+
+        /* Fixed-height price/stock row */
         .price-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            height: 22px;
+        }
+
+        .price-row .price {
             color: #0f172a;
             font-weight: 700;
+            font-size: 17px;
+            letter-spacing: -0.01em;
+        }
+
+        .stock-low {
+            color: #b45309;
+            font-weight: 600;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .muted {
+            color: #64748b;
+            font-size: 13px;
         }
 
         .meta-row {
@@ -514,6 +720,7 @@
         }
 
         .btn-cart {
+            flex: 1;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -528,6 +735,14 @@
             background: #111827;
             color: white;
             box-sizing: border-box;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: background 0.2s ease;
+        }
+
+        .btn-cart:hover:not(:disabled) {
+            background: #1f2937;
         }
 
         .btn-cart:disabled {
@@ -568,6 +783,7 @@
     </style>
 </head>
 <body>
+    {% csrf_token %}
     <header>
         <nav class="navbar">
             <div class="navbar-container">
@@ -576,29 +792,25 @@
                 </a>
                 <ul class="navbar-links" id="navbarLinks">
                     <li><a href="{% url 'buyer_home' %}">Home</a></li>
-                    <li class="nav-dropdown">
-                        <details>
-                            <summary>Categories</summary>
-                            <div class="nav-dropdown-menu">
-                                {% for category in nav_categories %}
-                                <a href="{% url 'buyer_category' %}?category_id={{ category.id }}">{{ category.name }}</a>
-                                {% empty %}
-                                <span class="nav-dropdown-empty">No categories yet</span>
-                                {% endfor %}
-                            </div>
-                        </details>
+                    <li class="nav-dropdown" data-hover-dropdown>
+                        <button type="button" class="nav-dropdown-trigger">Categories</button>
+                        <div class="nav-dropdown-menu">
+                            {% for category in nav_categories %}
+                            <a href="{% url 'buyer_category' %}?category_id={{ category.id }}">{{ category.name }}</a>
+                            {% empty %}
+                            <span class="nav-dropdown-empty">No categories yet</span>
+                            {% endfor %}
+                        </div>
                     </li>
-                    <li class="nav-dropdown">
-                        <details>
-                            <summary>Seasons</summary>
-                            <div class="nav-dropdown-menu">
-                                {% for season in nav_seasons %}
-                                <a href="{% url 'buyer_category' %}?season_id={{ season.id }}">{{ season.name }}</a>
-                                {% empty %}
-                                <span class="nav-dropdown-empty">No seasons yet</span>
-                                {% endfor %}
-                            </div>
-                        </details>
+                    <li class="nav-dropdown" data-hover-dropdown>
+                        <button type="button" class="nav-dropdown-trigger">Seasons</button>
+                        <div class="nav-dropdown-menu">
+                            {% for season in nav_seasons %}
+                            <a href="{% url 'buyer_category' %}?season_id={{ season.id }}">{{ season.name }}</a>
+                            {% empty %}
+                            <span class="nav-dropdown-empty">No seasons yet</span>
+                            {% endfor %}
+                        </div>
                     </li>
                     <li><a href="{% url 'buyer_home' %}#new-arrivals">New Arrivals</a></li>
                     <li><a href="{% url 'buyer_orders' %}">Your Orders</a></li>
@@ -613,20 +825,22 @@
                         {% if nav_cart_count %}<span class="nav-badge">{{ nav_cart_count }}</span>{% endif %}
                     </a>
                     {% if current_buyer or current_supplier %}
-                    <details class="account-menu">
-                        <summary class="auth-btn primary"><i class="fas fa-user"></i> My Account</summary>
+                    <div class="account-menu" data-hover-dropdown>
+                        <button type="button" class="auth-btn primary account-menu-trigger"><i class="fas fa-user"></i> My Account</button>
                         <div class="account-dropdown">
-                            {% if current_buyer %}
-                            <p><strong>{{ current_buyer.full_name }}</strong><br>{{ current_buyer.email }}</p>
-                            {% elif current_supplier %}
-                            <p><strong>{{ current_supplier.full_name }}</strong><br>{{ current_supplier.email }}</p>
-                            {% endif %}
-                            <form method="post" action="{% url 'logout' %}">
-                                {% csrf_token %}
-                                <button type="submit" class="btn-logout">Logout</button>
-                            </form>
+                            <div class="account-dropdown-actions">
+                                <button type="button" class="btn-my-info" id="myInfoBtn"
+                                        data-info-url="{% if current_buyer %}{% url 'buyer_account_info' %}{% else %}{% url 'supplier_account_info' %}{% endif %}">
+                                    My Info
+                                </button>
+                                <form method="post" action="{% url 'logout' %}">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn-logout">Logout</button>
+                                </form>
+                            </div>
+                            <div class="account-info-panel" id="accountInfoPanel" style="display:none;"></div>
                         </div>
-                    </details>
+                    </div>
                     {% else %}
                     <a href="{% url 'buyer_login_request' %}" class="auth-btn" data-auth-trigger>Sign In</a>
                     <a href="{% url 'supplier_login_request' %}" class="auth-btn" data-auth-trigger>Sign In as Supplier</a>
@@ -653,6 +867,11 @@
     </div>
 
     <script>
+    function getCsrfToken() {
+        var match = document.cookie.match(/(?:^|;\s*)csrftoken=([^;]+)/);
+        return match ? decodeURIComponent(match[1]) : '';
+    }
+
     (function () {
         var overlay = document.getElementById('authModalOverlay');
         var body = document.getElementById('authModalBody');
@@ -683,6 +902,13 @@
                         return;
                     }
                     body.innerHTML = data.html;
+                    (data.messages || []).forEach(function (m) {
+                        var tag = ['error', 'warning', 'success'].indexOf(m.tags) !== -1 ? m.tags : 'error';
+                        var alert = document.createElement('div');
+                        alert.className = 'modal-alert ' + tag;
+                        alert.textContent = m.text;
+                        body.insertBefore(alert, body.firstChild);
+                    });
                     currentActionUrl = data.action_url;
                     bindStep();
                 })
@@ -766,7 +992,10 @@
             var originalText = btn.dataset.originalText || btn.textContent;
             btn.dataset.originalText = originalText;
             btn.disabled = true;
-            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            fetch(url, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCsrfToken() }
+            })
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
                     if (data.success) {
@@ -792,7 +1021,10 @@
             if (!btn) return;
             var url = btn.getAttribute('data-toggle-wishlist');
             btn.disabled = true;
-            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            fetch(url, {
+                method: 'POST',
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCsrfToken() }
+            })
                 .then(function (r) { return r.json(); })
                 .then(function (data) {
                     btn.disabled = false;
@@ -816,6 +1048,78 @@
         if (!toggle || !links) return;
         toggle.addEventListener('click', function () {
             links.classList.toggle('open');
+        });
+    })();
+
+    (function () {
+        // Dropdowns open on hover (handled purely by CSS :hover). This just adds
+        // a tap-to-toggle fallback for touch devices, which have no hover state.
+        var dropdowns = document.querySelectorAll('[data-hover-dropdown]');
+        dropdowns.forEach(function (dropdown) {
+            var trigger = dropdown.querySelector('.nav-dropdown-trigger, .account-menu-trigger');
+            if (!trigger) return;
+            trigger.addEventListener('click', function (e) {
+                e.stopPropagation();
+                var wasOpen = dropdown.classList.contains('open');
+                dropdowns.forEach(function (other) { other.classList.remove('open'); });
+                if (!wasOpen) dropdown.classList.add('open');
+            });
+        });
+
+        document.addEventListener('click', function (e) {
+            dropdowns.forEach(function (dropdown) {
+                if (!dropdown.contains(e.target)) dropdown.classList.remove('open');
+            });
+        });
+    })();
+
+    (function () {
+        var infoBtn = document.getElementById('myInfoBtn');
+        var panel = document.getElementById('accountInfoPanel');
+        if (!infoBtn || !panel) return;
+
+        function bindForm() {
+            var form = panel.querySelector('[data-account-info-form]');
+            if (!form) return;
+            form.addEventListener('submit', function (e) {
+                e.preventDefault();
+                fetch(infoBtn.getAttribute('data-info-url'), {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCsrfToken() },
+                    body: new FormData(form)
+                })
+                    .then(function (r) { return r.json(); })
+                    .then(function (data) {
+                        if (data.success) {
+                            panel.innerHTML = '<p class="account-info-success">' + data.message + '</p>';
+                        } else {
+                            panel.innerHTML = data.html;
+                            bindForm();
+                        }
+                    });
+            });
+        }
+
+        function loadInfo() {
+            panel.innerHTML = '<p class="muted">Loading...</p>';
+            fetch(infoBtn.getAttribute('data-info-url'), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    panel.innerHTML = data.html;
+                    bindForm();
+                });
+        }
+
+        infoBtn.addEventListener('click', function () {
+            var isOpen = panel.style.display === 'block';
+            if (isOpen) {
+                panel.style.display = 'none';
+                infoBtn.textContent = 'My Info';
+            } else {
+                panel.style.display = 'block';
+                infoBtn.textContent = 'Hide Info';
+                loadInfo();
+            }
         });
     })();
     </script>

@@ -1,4 +1,4 @@
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 
 from django.db import models
 from django.contrib.auth.models import AbstractUser
@@ -92,7 +92,8 @@ class Product(models.Model):
         super().delete(*args, **kwargs)
 
 
-class Order(models.Model):
+class OrderGroup(models.Model):
+    """One checkout = one OrderGroup, holding one OrderItem per product line."""
     STATUS_CHOICES = [
         ('pending', 'Pending'),
         ('approved', 'Approved'),
@@ -100,27 +101,32 @@ class Order(models.Model):
         ('delivered', 'Delivered'),
     ]
     buyer = models.ForeignKey(Buyer, on_delete=models.CASCADE)
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
     supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)
-    quantity = models.PositiveIntegerField()
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
-    delivery_address = models.TextField(blank=False)  # <- NEW FIELD for where to send
+    delivery_address = models.TextField(blank=False)
     phone_number = models.CharField(max_length=20, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     order_date = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Order #{self.id} - {self.product.name} by {self.buyer.full_name}"
+        return f"Order #{self.id} - {self.buyer.full_name}"
 
-    def save(self, *args, **kwargs):
-        if self.product and self.quantity:
-            try:
-                price = self.product.price if self.product.price is not None else Decimal('0.00')
-                quantity = Decimal(self.quantity)
-                self.total_amount = price * quantity
-            except (InvalidOperation, TypeError, ValueError):
-                self.total_amount = None
-        super().save(*args, **kwargs)
+    @property
+    def total_amount(self):
+        return sum((item.line_total for item in self.items.all()), Decimal('0.00'))
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(OrderGroup, on_delete=models.CASCADE, related_name='items')
+    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    quantity = models.PositiveIntegerField()
+    unit_price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.quantity} x {self.product.name}"
+
+    @property
+    def line_total(self):
+        return self.unit_price * self.quantity
 
 #one-time passcode used for passwordless buyer/supplier login
 class EmailOTP(models.Model):

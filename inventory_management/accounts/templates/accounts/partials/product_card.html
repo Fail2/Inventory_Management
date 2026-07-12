@@ -1,26 +1,27 @@
 <div class="product-card">
     <a class="product-link" href="{% url 'buyer_product_detail' 'buyer' product.id %}">
-        {% if product.picture and product.picture.name %}
-        <img src="{{ product.picture.url }}" alt="{{ product.name }}">
-        {% else %}
-        <img src="/media/product_images/default-image.jpg" alt="{{ product.name }}">
-        {% endif %}
-        <div class="meta-row">
-            {% if product.season %}<span class="pill">{{ product.season.name }}</span>{% endif %}
-            {% if product.category %}<span class="pill soft">{{ product.category.name }}</span>{% endif %}
+        <div class="product-image-wrap">
+            {% if product.picture and product.picture.name %}
+            <img src="{{ product.picture.url }}" alt="{{ product.name }}">
+            {% else %}
+            <img src="/media/product_images/default-image.jpg" alt="{{ product.name }}">
+            {% endif %}
         </div>
         <h3>{{ product.name }}</h3>
-        <div class="muted">★★★★★ 4.8</div>
         <div class="price-row">
-            <span>${{ product.price }}</span>
+            <span class="price">${{ product.price }}</span>
+            {% if product.quantity <= 5 %}
+            <span class="stock-low">Only {{ product.quantity }} left</span>
+            {% else %}
             <span class="muted">Stock {{ product.quantity }}</span>
+            {% endif %}
         </div>
     </a>
-    <div style="display:flex; gap:8px;">
+    <div class="product-card-actions">
         {% if product.id|stringformat:"s" in cart_product_ids %}
-        <button type="button" class="btn-cart" style="flex:1;" disabled>Added to Cart</button>
+        <button type="button" class="btn-cart" disabled>Added to Cart</button>
         {% else %}
-        <button type="button" class="btn-cart" style="flex:1;" data-add-to-cart="{% url 'add_to_cart' product.id %}">Add to Cart</button>
+        <button type="button" class="btn-cart" data-add-to-cart="{% url 'add_to_cart' product.id %}">Add to Cart</button>
         {% endif %}
         {% if product.id|stringformat:"s" in wishlist_ids %}
         <button type="button" class="btn-wishlist active" data-toggle-wishlist="{% url 'toggle_wishlist' product.id %}"><i class="fas fa-heart"></i></button>

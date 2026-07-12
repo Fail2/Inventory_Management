@@ -22,6 +22,7 @@ urlpatterns = [
     path('edit/<str:group_by>/<int:group_id>/', views.edit_group, name='edit_group'),
     path('delete/<str:group_by>/<int:group_id>/', views.delete_group, name='delete_group'),
     path('admin/orders/', views.admin_order_list, name='admin_order_list'),
+    path('admin/orders/<int:order_id>/delete/', views.delete_order, name='delete_order'),
 
 
     # Buyer/Seller login
@@ -43,6 +44,7 @@ urlpatterns = [
     path('buyer/wishlist/toggle/<int:product_id>/', views.toggle_wishlist, name='toggle_wishlist'),
     path('buyer/orders/', views.buyer_orders, name='buyer_orders'),
     path('buyer/checkout/', views.checkout_view, name='checkout'),
+    path('buyer/account/info/', views.buyer_account_info, name='buyer_account_info'),
     path('<str:user_type>/product/<int:product_id>/', views.buyer_product_detail, name='buyer_product_detail'),
 
 
@@ -51,6 +53,7 @@ urlpatterns = [
     path('supplier/login/verify/', views.supplier_login_verify, name='supplier_login_verify'),
     path('supplier/register/complete/', views.supplier_complete_profile, name='supplier_complete_profile'),
     path('supplier/home/', views.supplier_home, name='supplier_home'),
+    path('supplier/account/info/', views.supplier_account_info, name='supplier_account_info'),
 
 ]
 

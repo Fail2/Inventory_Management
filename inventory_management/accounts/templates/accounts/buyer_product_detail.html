@@ -27,7 +27,6 @@
     .btn-primary { background: #111827; color: white; flex: 1; }
     .btn-primary:disabled { background: #16a34a; color: white; cursor: default; opacity: 1; }
     .btn-secondary { background: #f1f5f9; color: #0f172a; }
-    .related-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 260px)); justify-content: start; gap: 16px; margin-top: 20px; }
     @media (max-width: 960px) { .detail-shell { grid-template-columns: 1fr; } }
 </style>
 {% endblock %}
@@ -75,7 +74,7 @@
     <div class="section-title" style="margin-bottom: 10px;">
         <h2>Related Products</h2>
     </div>
-    <div class="related-grid">
+    <div class="product-grid">
         {% for related in related_products %}
         {% include 'accounts/partials/product_card.html' with product=related %}
         {% endfor %}
@@ -116,7 +115,10 @@
         var url = addUrl + '?quantity=' + qty;
         var originalText = addBtn.textContent;
         addBtn.disabled = true;
-        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        fetch(url, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'X-CSRFToken': getCsrfToken() }
+        })
             .then(function (r) { return r.json(); })
             .then(function (data) {
                 if (data.success) {

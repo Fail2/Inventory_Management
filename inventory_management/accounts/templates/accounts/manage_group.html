@@ -8,8 +8,8 @@
             <h2>Manage {{ group_by|title }}</h2>
             <p>Create, edit, and remove {{ group_by }} entries from one place.</p>
         </div>
-        <div style="display:flex; gap:10px;">
-            <a href="{% url 'grouped_product_list' group_by %}" class="add-btn" style="background:#0f766e;">
+        <div class="header-actions">
+            <a href="{% url 'grouped_product_list' group_by %}" class="add-btn secondary-btn">
                 <i class="fas fa-box-open"></i> View Products
             </a>
             <a href="{% url 'add_group' group_by %}" class="add-btn">
@@ -18,24 +18,29 @@
         </div>
     </div>
 
+    <div class="search-bar">
+        <i class="fas fa-magnifying-glass search-icon"></i>
+        <input type="text" placeholder="Search {{ group_by }} by name" class="search-input" data-live-search="groupsTable" autofocus>
+    </div>
+
     <div class="table-card">
-        <table>
+        <table id="groupsTable">
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>Actions</th>
+                    <th class="center">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 {% for group in groups %}
-                <tr>
-                    <td>{{ group.name }}</td>
-                    <td>
+                <tr data-search-text="{{ group.name|lower }}">
+                    <td class="name-cell">{{ group.name }}</td>
+                    <td class="center">
                         <div class="action-group">
-                            <a href="{% url 'edit_group' group_by group.id %}" class="icon-btn edit-btn">
+                            <a href="{% url 'edit_group' group_by group.id %}" class="icon-btn edit-btn" title="Edit">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <a href="{% url 'delete_group' group_by group.id %}" class="icon-btn delete-btn">
+                            <a href="{% url 'delete_group' group_by group.id %}" class="icon-btn delete-btn" title="Delete">
                                 <i class="fas fa-trash"></i>
                             </a>
                         </div>
@@ -43,9 +48,12 @@
                 </tr>
                 {% empty %}
                 <tr>
-                    <td colspan="2" class="empty-state">No {{ group_by }} entries found.</td>
+                    <td colspan="2" class="empty-cell">No {{ group_by }} entries found.</td>
                 </tr>
                 {% endfor %}
+                <tr id="groupsTable-empty" class="empty-row" style="display:none;">
+                    <td colspan="2" class="empty-cell">No {{ group_by }} entries match your search.</td>
+                </tr>
             </tbody>
         </table>
     </div>
@@ -54,19 +62,21 @@
 
 {% block extra_css %}
 <style>
-    .page-shell { width: 100%; }
-    .page-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
-    .page-header h2 { margin: 0; font-size: 24px; }
-    .page-header p { margin: 4px 0 0; color: #64748b; }
-    .add-btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 8px; background: #2563eb; color: white; text-decoration: none; }
-    .table-card { background: #fff; border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.06); padding: 16px; overflow-x: auto; }
+    .header-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .secondary-btn { background: #0f766e; }
+
     table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 12px 10px; border-bottom: 1px solid #e5e7eb; text-align: left; }
-    th { background: #f8fafc; color: #334155; }
-    .action-group { display: flex; gap: 8px; }
-    .icon-btn { display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; color: white; text-decoration: none; }
-    .edit-btn { background: #0f766e; }
-    .delete-btn { background: #dc2626; }
-    .empty-state { text-align: center; color: #64748b; }
+    th, td { padding: 12px 10px; border-bottom: 1px solid #e5e7eb; text-align: left; vertical-align: middle; }
+    th { background: #f8fafc; color: #475569; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+    th.center, td.center { text-align: center; }
+    tbody tr:hover { background: #f8fafc; }
+    .name-cell { font-weight: 600; color: var(--text); }
+    .action-group { display: flex; gap: 8px; justify-content: center; }
+    .empty-cell, .empty-row td { text-align: center; color: var(--text-muted); padding: 24px 10px; }
+
+    @media (max-width: 600px) {
+        .header-actions { width: 100%; }
+        .header-actions .add-btn { flex: 1; justify-content: center; }
+    }
 </style>
 {% endblock %}

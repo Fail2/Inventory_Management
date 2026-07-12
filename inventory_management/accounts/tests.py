@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 from django.urls import reverse
 
-from .models import Buyer, Category, Order, Product, Season, Supplier
+from .models import Buyer, Category, OrderGroup, OrderItem, Product, Season, Supplier
 
 
 class AddSupplierEmailFallbackTests(TestCase):
@@ -44,14 +44,22 @@ class ProductListFilteringTests(TestCase):
         Product.objects.create(name='Ergonomic Chair', category=self.category, season=self.season, price='99.99', quantity=10)
         Product.objects.create(name='Standing Desk', category=self.category, season=self.season, price='149.00', quantity=5)
 
-    def test_product_list_filters_by_name_query(self):
+    def test_product_list_renders_all_products_for_client_side_search(self):
+        # Search is real-time and client-side (see product_list.html), so the
+        # view always renders every product with a data-search-text
+        # attribute for the page's JS to filter against.
         self.client.force_login(self.admin_user)
 
-        response = self.client.get(reverse('product_list'), {'q': 'ergonomic'})
+        response = self.client.get(reverse('product_list'))
 
         self.assertEqual(response.status_code, 200)
         self.assertIn('products', response.context)
-        self.assertEqual(list(response.context['products']), [Product.objects.get(name='Ergonomic Chair')])
+        self.assertCountEqual(
+            response.context['products'],
+            [Product.objects.get(name='Ergonomic Chair'), Product.objects.get(name='Standing Desk')],
+        )
+        self.assertContains(response, 'data-search-text="ergonomic chair"')
+        self.assertContains(response, 'data-search-text="standing desk"')
 
 
 class AdminOrderListFilteringTests(TestCase):
@@ -65,7 +73,8 @@ class AdminOrderListFilteringTests(TestCase):
         self.season = Season.objects.create(name='Spring')
         self.product = Product.objects.create(name='Office Lamp', category=self.category, season=self.season, price='45.00', quantity=20)
         self.buyer = Buyer.objects.create(full_name='Alice Buyer', address='1 Main St', email='alice@example.com')
-        self.order = Order.objects.create(buyer=self.buyer, product=self.product, quantity=2, delivery_address='123 Main St', status='pending')
+        self.order = OrderGroup.objects.create(buyer=self.buyer, delivery_address='123 Main St', status='pending')
+        OrderItem.objects.create(order=self.order, product=self.product, quantity=2, unit_price=self.product.price)
 
     def test_admin_order_list_filters_by_status(self):
         self.client.force_login(self.admin_user)
@@ -147,7 +156,6 @@ class BuyerStorefrontTests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Featured Products')
-        self.assertContains(response, 'Shop by Season')
         self.assertContains(response, 'Runner Shoes')
 
     def test_wishlist_page_shows_saved_products(self):
@@ -162,7 +170,7 @@ class BuyerStorefrontTests(TestCase):
         self.assertContains(response, self.product.name)
 
     def test_add_to_cart_stores_item_in_session(self):
-        response = self.client.get(reverse('add_to_cart', args=[self.product.id]))
+        response = self.client.post(reverse('add_to_cart', args=[self.product.id]))
 
         self.assertEqual(response.status_code, 302)
         self.assertIn(str(self.product.id), self.client.session['cart'])

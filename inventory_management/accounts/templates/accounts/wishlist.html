@@ -11,7 +11,8 @@
     .item-info strong { font-size: 15px; }
     .item-info .price { font-weight: 700; color: #111827; }
     .item-media { width: 56px; height: 56px; flex: 0 0 auto; border-radius: 12px; overflow: hidden; background: #f8fafc; border: 1px solid #e2e8f0; }
-    .item-media img { width: 100%; height: 100%; object-fit: contain; }
+    .item-media img { width: 100%; height: 100%; object-fit: contain; transition: transform 0.3s ease; }
+    .item-media:hover img { transform: scale(1.08); }
     .btn-delete {
         width: 36px; height: 36px; border-radius: 999px; border: none;
         background: #fef2f2; color: #dc2626; cursor: pointer;
@@ -19,6 +20,12 @@
     }
     .btn-delete:hover { background: #fee2e2; }
     .btn-delete:disabled { opacity: 0.5; cursor: default; }
+
+    @media (max-width: 420px) {
+        .item { gap: 10px; }
+        .item-media { width: 44px; height: 44px; }
+        .item-info { gap: 2px; }
+    }
 </style>
 {% endblock %}
 

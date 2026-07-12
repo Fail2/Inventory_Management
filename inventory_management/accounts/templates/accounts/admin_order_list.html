@@ -12,31 +12,83 @@
                 <option value="{{ value }}" {% if selected_status == value %}selected{% endif %}>{{ label }}</option>
                 {% endfor %}
             </select>
-            <button type="submit" class="btn btn-primary">Apply</button>
+            <button type="submit" class="btn btn-primary"><i class="fas fa-filter"></i> Apply</button>
             <a href="{% url 'admin_order_list' %}" class="btn btn-secondary">Reset</a>
         </form>
     </div>
 
     <div class="order-list">
         {% for order in orders %}
-        <div class="order-card">
-            <div class="order-image">
-                {% if order.product.picture %}
-                <img src="{{ order.product.picture.url }}" alt="{{ order.product.name }}">
-                {% else %}
-                <img src="/media/product_images/default-image.jpg" alt="{{ order.product.name }}">
-                {% endif %}
-            </div>
-            <div class="order-content">
-                <div class="order-topline">
-                    <h3>{{ order.product.name }}</h3>
-                    <span class="badge">{{ order.status|capfirst }}</span>
+        <div class="order-card status-{{ order.status }}">
+            <div class="order-card-header">
+                <div>
+                    <h3>Order #{{ order.id }}</h3>
+                    <span class="order-date"><i class="far fa-clock"></i> {{ order.order_date|date:'M d, Y · H:i' }}</span>
                 </div>
-                <p><strong>Buyer:</strong> {{ order.buyer.full_name }}</p>
-                <p><strong>Quantity:</strong> {{ order.quantity }}</p>
-                <p><strong>Address:</strong> {{ order.delivery_address }}</p>
-                <p><strong>Ordered:</strong> {{ order.order_date|date:'Y-m-d H:i' }}</p>
+                <span class="badge badge-{{ order.status }}">
+                    <i class="fas fa-circle"></i> {{ order.status|capfirst }}
+                </span>
+            </div>
 
+            <div class="order-body">
+                <div class="order-items">
+                    {% for item in order.items.all %}
+                    <div class="order-item-row">
+                        <div class="order-image">
+                            {% if item.product.picture %}
+                            <img src="{{ item.product.picture.url }}" alt="{{ item.product.name }}">
+                            {% else %}
+                            <img src="/media/product_images/default-image.jpg" alt="{{ item.product.name }}">
+                            {% endif %}
+                        </div>
+                        <div class="order-item-info">
+                            <span class="order-item-name">{{ item.product.name }}</span>
+                            <span class="muted-note">Qty {{ item.quantity }} × ${{ item.unit_price }}</span>
+                        </div>
+                        <div class="order-item-total">${{ item.line_total }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="order-info-grid">
+                    <div class="info-cell">
+                        <i class="fas fa-user"></i>
+                        <div>
+                            <span class="info-label">Buyer</span>
+                            <span>{{ order.buyer.full_name }}</span>
+                        </div>
+                    </div>
+                    <div class="info-cell">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <span class="info-label">Email</span>
+                            <span>{{ order.buyer.email }}</span>
+                        </div>
+                    </div>
+                    <div class="info-cell">
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <span class="info-label">Phone</span>
+                            <span>{{ order.phone_number|default:"—" }}</span>
+                        </div>
+                    </div>
+                    <div class="info-cell">
+                        <i class="fas fa-location-dot"></i>
+                        <div>
+                            <span class="info-label">Shipping Address</span>
+                            <span>{{ order.delivery_address }}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="order-total-bar">
+                    <span>Total</span>
+                    <span class="order-total-amount">${{ order.total_amount }}</span>
+                </div>
+            </div>
+
+            <div class="order-actions">
+                {% if order.status != 'delivered' %}
                 <form method="post" class="inline-form">
                     {% csrf_token %}
                     <input type="hidden" name="order_id" value="{{ order.id }}">
@@ -49,22 +101,37 @@
                             {% endfor %}
                         </select>
                     </label>
-                    <button type="submit" class="btn btn-primary">Assign</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-truck"></i> Assign</button>
                 </form>
+                {% endif %}
 
+                {% if order.status == 'pending' %}
                 <form method="post" class="inline-form">
                     {% csrf_token %}
                     <input type="hidden" name="order_id" value="{{ order.id }}">
-                    <label>
-                        Status
-                        <select name="status">
-                            {% for value, label in status_choices %}
-                            <option value="{{ value }}" {% if order.status == value %}selected{% endif %}>{{ label }}</option>
-                            {% endfor %}
-                        </select>
-                    </label>
-                    <button type="submit" class="btn btn-secondary">Update</button>
+                    <input type="hidden" name="status" value="approved">
+                    <button type="submit" class="btn btn-secondary"><i class="fas fa-check"></i> Approve Order</button>
                 </form>
+                <form method="post" action="{% url 'delete_order' order.id %}" class="inline-form" onsubmit="return confirm('Delete this order?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Delete</button>
+                </form>
+                {% elif order.status == 'approved' %}
+                {% if order.supplier %}
+                <form method="post" class="inline-form">
+                    {% csrf_token %}
+                    <input type="hidden" name="order_id" value="{{ order.id }}">
+                    <input type="hidden" name="status" value="shipped">
+                    <button type="submit" class="btn btn-secondary"><i class="fas fa-box"></i> Mark as Shipped</button>
+                </form>
+                {% else %}
+                <p class="muted-note"><i class="fas fa-triangle-exclamation"></i> Assign a supplier before marking this shipped.</p>
+                {% endif %}
+                {% elif order.status == 'shipped' %}
+                <p class="muted-note"><i class="fas fa-hourglass-half"></i> Waiting for the assigned supplier to mark this delivered.</p>
+                {% elif order.status == 'delivered' %}
+                <p class="muted-note delivered-note"><i class="fas fa-lock"></i> Delivered — locked.</p>
+                {% endif %}
             </div>
         </div>
         {% empty %}
@@ -78,22 +145,106 @@
 <style>
     .order-shell { width: 100%; }
     .page-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+    .page-header h2 { margin: 0; }
     .filter-bar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
     .filter-select { padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 6px; min-width: 180px; }
-    .order-list { display: grid; gap: 16px; }
-    .order-card { display: flex; gap: 16px; padding: 16px; border: 1px solid #e5e7eb; border-radius: 12px; background: #fff; box-shadow: 0 4px 12px rgba(0,0,0,0.04); }
-    .order-image { width: 120px; height: 120px; flex-shrink: 0; }
-    .order-image img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
-    .order-content { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-    .order-topline { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-    .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; background: #e0f2fe; color: #0369a1; font-size: 12px; text-transform: capitalize; }
+
+    .order-list { display: grid; gap: 18px; }
+
+    .order-card {
+        background: #fff;
+        border: 1px solid #e5e7eb;
+        border-left: 4px solid #cbd5e1;
+        border-radius: 14px;
+        box-shadow: 0 4px 14px rgba(15,23,42,0.05);
+        overflow: hidden;
+        transition: box-shadow 0.15s ease, transform 0.15s ease;
+    }
+    .order-card:hover { box-shadow: 0 10px 26px rgba(15,23,42,0.09); transform: translateY(-1px); }
+
+    .order-card.status-pending { border-left-color: #f59e0b; }
+    .order-card.status-approved { border-left-color: #2563eb; }
+    .order-card.status-shipped { border-left-color: #7c3aed; }
+    .order-card.status-delivered { border-left-color: #16a34a; }
+
+    .order-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 12px;
+        padding: 16px 20px;
+        background: #f8fafc;
+        border-bottom: 1px solid #eef2f7;
+    }
+    .order-card-header h3 { margin: 0 0 4px; font-size: 17px; }
+    .order-date { font-size: 12px; color: #64748b; }
+
+    .order-body { padding: 16px 20px; display: flex; flex-direction: column; gap: 14px; }
+
+    .order-items {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+    .order-item-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding-bottom: 10px;
+        border-bottom: 1px dashed #eef2f7;
+    }
+    .order-item-row:last-child { border-bottom: none; padding-bottom: 0; }
+    .order-image { width: 56px; height: 56px; flex-shrink: 0; background: #f8fafc; }
+    .order-image img { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; border: 1px solid #eef2f7; transition: transform 0.3s ease; }
+    .order-image:hover img { transform: scale(1.08); }
+    .order-item-info { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+    .order-item-name { font-weight: 600; font-size: 14px; }
+    .order-item-total { font-weight: 600; font-size: 14px; white-space: nowrap; color: #334155; }
+
+    .order-info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        padding: 14px;
+        background: #f8fafc;
+        border-radius: 10px;
+    }
+    .info-cell { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; }
+    .info-cell i { color: #94a3b8; margin-top: 3px; width: 14px; }
+    .info-cell div { display: flex; flex-direction: column; gap: 2px; min-width: 0; word-break: break-word; }
+    .info-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: #94a3b8; font-weight: 600; }
+
+    .order-total-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 14px;
+        background: #111827;
+        border-radius: 10px;
+        color: white;
+        font-size: 14px;
+    }
+    .order-total-amount { font-size: 18px; font-weight: 700; }
+
+    .order-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: end;
+        padding: 14px 20px;
+        border-top: 1px solid #eef2f7;
+    }
+
     .inline-form { display: flex; flex-wrap: wrap; gap: 10px; align-items: end; }
     .inline-form label { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: #334155; }
     .inline-form select { padding: 7px 8px; border: 1px solid #cbd5e1; border-radius: 6px; min-width: 150px; }
-    .btn { display: inline-block; padding: 8px 12px; border-radius: 6px; text-decoration: none; border: 0; cursor: pointer; font-size: 14px; }
-    .btn-primary { background: #2563eb; color: white; }
-    .btn-secondary { background: #e2e8f0; color: #0f172a; }
-    .empty-state { padding: 20px; border: 1px dashed #cbd5e1; border-radius: 10px; text-align: center; color: #64748b; background: #f8fafc; }
-    @media (max-width: 700px) { .order-card { flex-direction: column; } .order-image { width: 100%; height: 180px; } }
+
+    .muted-note { margin: 0; font-size: 13px; color: #64748b; font-style: italic; display: flex; align-items: center; gap: 6px; }
+    .delivered-note { color: #16a34a; font-style: normal; font-weight: 600; }
+
+    @media (max-width: 700px) {
+        .order-card-header { flex-direction: column; gap: 8px; }
+        .order-info-grid { grid-template-columns: 1fr; }
+    }
 </style>
 {% endblock %}

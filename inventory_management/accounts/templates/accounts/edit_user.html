@@ -2,155 +2,52 @@
 {% block title %}Edit {{ user_type|title }}{% endblock %}
 
 {% block content %}
-<div class="edit-container">
-    <div class="edit-header">
-        <h2>Edit {{ user_type|title }}: {{ user.full_name }}</h2>
+<div class="form-card">
+    <div class="form-card-header">
+        <div>
+            <h2>Edit {{ user_type|title }}: {{ user_obj.full_name }}</h2>
+            <p>Update {{ user_type }} profile details.</p>
+        </div>
     </div>
 
-    {% if messages %}
-        {% for message in messages %}
-            <div class="alert {{ message.tags }}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    {% endif %}
+    <form method="POST">
+        {% csrf_token %}
+        <div class="form-card-body">
+            {% if form.non_field_errors %}
+            <ul class="field-errors">
+                {% for error in form.non_field_errors %}<li>{{ error }}</li>{% endfor %}
+            </ul>
+            {% endif %}
 
-    <div class="form-container">
-        <form method="POST">
-            {% csrf_token %}
-
-            <div class="form-group">
-                <label for="id_full_name">Full Name</label>
+            <div class="field-group">
+                <label for="{{ form.full_name.id_for_label }}">Full Name</label>
                 {{ form.full_name }}
+                {% if form.full_name.errors %}
+                <ul class="field-errors">{% for error in form.full_name.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                {% endif %}
             </div>
 
-            <div class="form-group">
-                <label for="id_address">Address</label>
+            <div class="field-group">
+                <label for="{{ form.address.id_for_label }}">Address</label>
                 {{ form.address }}
+                {% if form.address.errors %}
+                <ul class="field-errors">{% for error in form.address.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                {% endif %}
             </div>
 
-            <div class="form-group">
-                <label for="id_email">Email</label>
+            <div class="field-group">
+                <label for="{{ form.email.id_for_label }}">Email</label>
                 {{ form.email }}
+                {% if form.email.errors %}
+                <ul class="field-errors">{% for error in form.email.errors %}<li>{{ error }}</li>{% endfor %}</ul>
+                {% endif %}
             </div>
+        </div>
 
-            <div class="action-buttons">
-                <button type="submit" class="btn-save">Save Changes</button>
-                <a href="{% url 'user_list' user_type %}" class="btn-cancel">Cancel</a>
-            </div>
-        </form>
-    </div>
+        <div class="form-card-actions">
+            <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Save Changes</button>
+            <a href="{% url 'user_list' user_type %}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
 </div>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-    body {
-        background-color: #f5f6fa;
-        font-family: Arial, sans-serif;
-        margin: 0;
-        padding: 0;
-    }
-
-    .edit-container {
-        max-width: 600px;
-        margin:auto;
-        padding: 20px;
-    }
-
-    .edit-header {
-        text-align: center;
-        margin-bottom: 20px;
-    }
-
-    .edit-header h2 {
-        color: #333;
-    }
-
-    .alert {
-        padding: 10px 15px;
-        margin-bottom: 15px;
-        border-radius: 5px;
-        font-size: 14px;
-    }
-
-    .alert.success {
-        background-color: #d4edda;
-        color: #155724;
-        border: 1px solid #c3e6cb;
-    }
-
-    .alert.error {
-        background-color: #f8d7da;
-        color: #721c24;
-        border: 1px solid #f5c6cb;
-    }
-
-    .form-container {
-        background: white;
-        padding: 25px;
-        border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    }
-
-    .form-group {
-        margin-bottom: 15px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 5px;
-        font-weight: 500;
-        color: #555;
-    }
-
-    .form-group input, .form-group textarea, .form-group select {
-        width: 100%;
-        padding: 8px 10px;
-        border: 1px solid #ccc;
-        border-radius: 4px;
-        font-size: 14px;
-        box-sizing: border-box;
-    }
-
-    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
-        border-color: #007bff;
-        outline: none;
-    }
-
-    .action-buttons {
-        display: flex;
-        justify-content: space-between;
-        margin-top: 20px;
-    }
-
-    .btn-save {
-        background-color: #007bff;
-        color: white;
-        padding: 10px 20px;
-        border: none;
-        border-radius: 5px;
-        font-size: 14px;
-        cursor: pointer;
-    }
-
-    .btn-save:hover {
-        background-color: #0056b3;
-    }
-
-    .btn-cancel {
-        background-color: #6c757d;
-        color: white;
-        padding: 10px 20px;
-        text-decoration: none;
-        border-radius: 5px;
-        font-size: 14px;
-        display: inline-block;
-        text-align: center;
-    }
-
-    .btn-cancel:hover {
-        background-color: #545b62;
-    }
-</style>
 {% endblock %}

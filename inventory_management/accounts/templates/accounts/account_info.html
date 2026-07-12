@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Verify Code</title>
+    <title>My Info</title>
     <style>
         body {
             background: #f2f2f2;
@@ -19,7 +19,7 @@
             padding: 40px 30px;
             border-radius: 10px;
             box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
-            width: 350px;
+            width: 380px;
             max-width: 90vw;
         }
 
@@ -41,7 +41,14 @@
             flex-direction: column;
         }
 
-        input, button {
+        label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+
+        input, textarea, button {
             width: 100%;
             padding: 12px 15px;
             margin-bottom: 15px;
@@ -50,13 +57,17 @@
             outline: none;
             font-size: 16px;
             box-sizing: border-box;
-            text-align: center;
-            letter-spacing: 4px;
+            font-family: inherit;
             transition: border 0.3s;
         }
 
-        input:focus {
+        input:focus, textarea:focus {
             border-color: #007bff;
+        }
+
+        input:disabled {
+            background: #f1f5f9;
+            color: #64748b;
         }
 
         button {
@@ -66,7 +77,6 @@
             border: none;
             cursor: pointer;
             transition: background-color 0.3s;
-            letter-spacing: normal;
         }
 
         button:hover {
@@ -79,17 +89,19 @@
 <body>
 
     <div class="login-container">
-        <h2>Enter Code</h2>
-        <p class="subtitle">We sent a 6-digit code to <strong>{{ email }}</strong>. It expires shortly.</p>
+        <h2>My Info</h2>
+        <p class="subtitle">Manage your {{ role_label }} account details.</p>
         <form method="POST">
             {% csrf_token %}
-            {{ form.code }}
-            {{ form.code.errors }}
-            <button type="submit">Verify</button>
-
-            <p style="margin-top:10px; text-align: center;">
-                <a href="{% url role|add:'_login_request' %}">Use a different email / resend code</a>
-            </p>
+            <label for="{{ form.full_name.id_for_label }}">Full Name</label>
+            {{ form.full_name }}
+            {{ form.full_name.errors }}
+            <label>Email</label>
+            <input type="email" value="{{ email }}" disabled>
+            <label for="{{ form.address.id_for_label }}">Address</label>
+            {{ form.address }}
+            {{ form.address.errors }}
+            <button type="submit">Save Changes</button>
         </form>
     </div>
 

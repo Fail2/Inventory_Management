@@ -34,26 +34,109 @@
     .section-title h2 { margin: 0; font-size: 20px; }
     .section-title a { color: #2563eb; text-decoration: none; font-weight: 600; }
 
-    .category-grid, .season-grid, .product-grid {
-        display: grid;
-        gap: 16px;
-    }
-
-    .category-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
-    .season-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
-    .product-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 260px)); justify-content: start; }
-
     .card { background: white; border-radius: 18px; padding: 16px; box-shadow: 0 10px 25px rgba(15,23,42,0.06); border: 1px solid #e2e8f0; }
-    .category-card { text-align: center; padding: 18px 12px; text-decoration: none; color: inherit; display: block; transition: transform 0.15s ease, box-shadow 0.15s ease; }
-    .category-card:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(15,23,42,0.1); }
-    .category-card i { font-size: 22px; color: #2563eb; margin-bottom: 8px; }
-    .season-card { min-height: 120px; display: flex; align-items: flex-end; color: white; font-weight: 700; text-decoration: none; transition: transform 0.15s ease; }
-    .season-card:hover { transform: translateY(-2px); }
-    .season-card span { background: rgba(17,24,39,0.35); padding: 10px 12px; border-radius: 999px; }
+
     .muted { color: #64748b; font-size: 13px; }
 
     @media (max-width: 900px) {
         .hero { grid-template-columns: 1fr; }
+    }
+
+    .arrivals-slider {
+        position: relative;
+        border-radius: 20px;
+        overflow: hidden;
+        background: #f8fafc;
+        border: 1px solid #e2e8f0;
+        height: 380px;
+    }
+
+    .arrivals-track {
+        position: relative;
+        width: 100%;
+        height: 100%;
+    }
+
+    .arrivals-slide {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        text-decoration: none;
+        opacity: 0;
+        transition: opacity 0.6s ease;
+        pointer-events: none;
+    }
+
+    .arrivals-slide.active {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    .arrivals-slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        background: white;
+    }
+
+    .arrivals-caption {
+        position: absolute;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        padding: 14px 20px;
+        background: linear-gradient(to top, rgba(15,23,42,0.78), transparent);
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+    }
+
+    .arrivals-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(255,255,255,0.92);
+        box-shadow: 0 4px 12px rgba(15,23,42,0.15);
+        cursor: pointer;
+        font-size: 14px;
+        color: #111827;
+    }
+
+    .arrivals-nav.prev { left: 14px; }
+    .arrivals-nav.next { right: 14px; }
+
+    .arrivals-dots {
+        position: absolute;
+        bottom: 14px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 6px;
+    }
+
+    .arrivals-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.55);
+        border: none;
+        cursor: pointer;
+        padding: 0;
+    }
+
+    .arrivals-dot.active { background: white; }
+
+    @media (max-width: 600px) {
+        .arrivals-slider { height: 260px; }
     }
 </style>
 {% endblock %}
@@ -66,7 +149,7 @@
         <p>Discover premium picks, fresh arrivals, and exclusive offers designed to fit your lifestyle.</p>
         <div class="hero-actions">
             <a href="#featured-products" class="btn btn-primary">Shop Now</a>
-            <a href="#seasons" class="btn btn-secondary">Explore Collections</a>
+            <a href="{% url 'buyer_category' %}" class="btn btn-secondary">Explore Collections</a>
         </div>
     </div>
     <div class="hero-card">
@@ -82,51 +165,42 @@
     </div>
 </div>
 
-<div class="section-title">
-    <h2>Quick Categories</h2>
-    <a href="{% url 'buyer_category' %}">View all</a>
-</div>
-<div class="category-grid">
-    {% for category in categories %}
-    <a href="{% url 'buyer_category' %}?category_id={{ category.id }}" class="card category-card">
-        <i class="fas {% cycle 'fa-tshirt' 'fa-shoe-prints' 'fa-glasses' 'fa-gem' 'fa-mobile-alt' 'fa-couch' 'fa-tag' %}"></i>
-        <div>{{ category.name }}</div>
-    </a>
-    {% empty %}
-    <div class="card category-card muted">No categories yet.</div>
-    {% endfor %}
-</div>
-
-<div class="section-title" id="seasons">
-    <h2>Shop by Season</h2>
-    <a href="{% url 'buyer_category' %}">See more</a>
-</div>
-<div class="season-grid">
-    {% for season in seasons %}
-    <a href="{% url 'buyer_category' %}?season_id={{ season.id }}" class="card season-card"
-       style="background: {% cycle 'linear-gradient(135deg,#f472b6,#fb7185)' 'linear-gradient(135deg,#fbbf24,#f59e0b)' 'linear-gradient(135deg,#34d399,#10b981)' 'linear-gradient(135deg,#60a5fa,#3b82f6)' 'linear-gradient(135deg,#a78bfa,#8b5cf6)' 'linear-gradient(135deg,#f87171,#ef4444)' %};">
-        <span>{{ season.name }}</span>
-    </a>
-    {% empty %}
-    <div class="card season-card muted" style="background:#f1f5f9; color:#64748b;">No seasons yet.</div>
-    {% endfor %}
-</div>
-
 {% if new_arrivals %}
 <div class="section-title" id="new-arrivals">
     <h2>New Arrivals</h2>
-    <span class="muted">Added in the last 30 days</span>
+    <a href="{% url 'buyer_category' %}">View all</a>
 </div>
-<div class="product-grid">
-    {% for product in new_arrivals %}
-    {% include 'accounts/partials/product_card.html' %}
-    {% endfor %}
+<div class="arrivals-slider" id="arrivalsSlider">
+    <div class="arrivals-track" id="arrivalsTrack">
+        {% for product in new_arrivals %}
+        <a class="arrivals-slide{% if forloop.first %} active{% endif %}" href="{% url 'buyer_product_detail' 'buyer' product.id %}">
+            {% if product.picture and product.picture.name %}
+            <img src="{{ product.picture.url }}" alt="{{ product.name }}">
+            {% else %}
+            <img src="/media/product_images/default-image.jpg" alt="{{ product.name }}">
+            {% endif %}
+            <div class="arrivals-caption">
+                <span>{{ product.name }}</span>
+                <span>${{ product.price }}</span>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% if new_arrivals|length > 1 %}
+    <button type="button" class="arrivals-nav prev" id="arrivalsPrev" aria-label="Previous">&#10094;</button>
+    <button type="button" class="arrivals-nav next" id="arrivalsNext" aria-label="Next">&#10095;</button>
+    <div class="arrivals-dots" id="arrivalsDots">
+        {% for product in new_arrivals %}
+        <button type="button" class="arrivals-dot{% if forloop.first %} active{% endif %}" data-index="{{ forloop.counter0 }}" aria-label="Go to slide {{ forloop.counter }}"></button>
+        {% endfor %}
+    </div>
+    {% endif %}
 </div>
 {% endif %}
 
 <div class="section-title" id="featured-products">
     <h2>Featured Products</h2>
-    <a href="{% url 'buyer_category' %}">Browse all</a>
+    <a href="{% url 'buyer_category' %}">View all</a>
 </div>
 <div class="product-grid">
     {% for product in products %}
@@ -135,4 +209,55 @@
     <div class="card" style="grid-column: 1 / -1; text-align: center;">No products are available yet.</div>
     {% endfor %}
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function () {
+    var track = document.getElementById('arrivalsTrack');
+    var slider = document.getElementById('arrivalsSlider');
+    if (!track || !slider) return;
+
+    var slides = track.children;
+    var dots = document.querySelectorAll('#arrivalsDots .arrivals-dot');
+    var prevBtn = document.getElementById('arrivalsPrev');
+    var nextBtn = document.getElementById('arrivalsNext');
+    var index = 0;
+    var timer = null;
+
+    function goTo(i) {
+        index = (i + slides.length) % slides.length;
+        Array.prototype.forEach.call(slides, function (slide, si) {
+            slide.classList.toggle('active', si === index);
+        });
+        dots.forEach(function (dot, di) { dot.classList.toggle('active', di === index); });
+    }
+
+    function next() { goTo(index + 1); }
+    function prev() { goTo(index - 1); }
+
+    function startAuto() {
+        stopAuto();
+        if (slides.length > 1) timer = setInterval(next, 4000);
+    }
+    function stopAuto() {
+        if (timer) clearInterval(timer);
+    }
+
+    if (prevBtn) prevBtn.addEventListener('click', function () { prev(); startAuto(); });
+    if (nextBtn) nextBtn.addEventListener('click', function () { next(); startAuto(); });
+    dots.forEach(function (dot) {
+        dot.addEventListener('click', function () {
+            goTo(parseInt(dot.getAttribute('data-index'), 10));
+            startAuto();
+        });
+    });
+
+    slider.addEventListener('mouseenter', stopAuto);
+    slider.addEventListener('mouseleave', startAuto);
+
+    goTo(0);
+    startAuto();
+})();
+</script>
 {% endblock %}

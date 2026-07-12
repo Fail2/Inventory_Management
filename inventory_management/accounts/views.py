@@ -2,6 +2,7 @@ import logging
 import random
 from decimal import Decimal
 from datetime import timedelta
+from functools import wraps
 
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -11,11 +12,11 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.csrf import csrf_protect
-from django.contrib.messages.storage.fallback import FallbackStorage
+from django.views.decorators.http import require_POST
 from django.db import transaction
 from django.utils import timezone
 from .models import Buyer,Supplier
-from .models import Product, Order,Category,Season,EmailOTP
+from .models import Product, OrderGroup, OrderItem, Category, Season, EmailOTP
 from .forms import (
     ProductForm, DynamicGroupForm, EmailOTPRequestForm, OTPVerifyForm,
     BuyerProfileForm, SupplierProfileForm, BuyerAdminForm, SupplierAdminForm,
@@ -49,14 +50,26 @@ def admin_login_view(request):
     return render(request, 'accounts/admin_login.html')
 
 
-#admin-dashboard
-@login_required(login_url='admin-login')  # Redirect to admin-login if not logged in
-def admin_dashboard(request):
-    if not request.user.is_superuser:
-        return redirect('admin-login')
+def admin_required(view_func):
+    """Like @login_required, but also requires is_superuser. Every admin
+    CRUD view is meant to be superuser-only; without this, an authenticated
+    non-superuser CustomUser (is_staff=True, is_superuser=False) would have
+    full access to every buyer/supplier/product/order management view."""
+    @wraps(view_func)
+    @login_required(login_url='admin-login')
+    def wrapped(request, *args, **kwargs):
+        if not request.user.is_superuser:
+            return redirect('admin-login')
+        return view_func(request, *args, **kwargs)
+    return wrapped
 
-    orders = Order.objects.select_related('buyer', 'product', 'supplier').all().order_by('-order_date')[:6]
-    pending_orders = Order.objects.filter(status='pending').count()
+
+#admin-dashboard
+@admin_required
+def admin_dashboard(request):
+    pending_orders_qs = OrderGroup.objects.filter(status='pending').select_related('buyer', 'supplier')
+    orders = pending_orders_qs.order_by('-order_date')[:6]
+    pending_orders = pending_orders_qs.count()
     product_count = Product.objects.count()
     supplier_count = Supplier.objects.count()
     buyer_count = Buyer.objects.count()
@@ -73,7 +86,7 @@ def admin_dashboard(request):
 
 
 # Common List View (Buyer/Supplier)
-@login_required(login_url='admin-login')
+@admin_required
 def user_list(request, user_type):
     if user_type == 'buyer':
         users = Buyer.objects.all()
@@ -86,7 +99,7 @@ def user_list(request, user_type):
         return redirect('admin_dashboard')  # fallback
 
     return render(request, 'accounts/user_list.html', {
-        'users': users,
+        'users': users.order_by('full_name'),
         'user_type': user_type,
         'title': title,
     })
@@ -96,7 +109,7 @@ ADMIN_FORM_CLASSES = {'buyer': BuyerAdminForm, 'supplier': SupplierAdminForm}
 
 
 # Common Add View (Buyer/Supplier)
-@login_required(login_url='admin-login')
+@admin_required
 def add_user(request, user_type):
     if user_type == 'buyer':
         title = "Add Buyer"
@@ -153,7 +166,7 @@ def add_user(request, user_type):
 
 
 # Common Edit View (Buyer/Supplier)
-@login_required(login_url='admin-login')
+@admin_required
 def edit_user(request, user_type, user_id):
     if user_type == 'buyer':
         model_class = Buyer
@@ -180,12 +193,13 @@ def edit_user(request, user_type, user_id):
     return render(request, 'accounts/edit_user.html', {
         'form': form,
         'user_type': user_type,
+        'user_obj': user,
         'title': title,
     })
 
 
 # Common Delete View (Buyer/Supplier)
-@login_required(login_url='admin-login')
+@admin_required
 def delete_user(request, user_type, user_id):
     if user_type == 'buyer':
         model_class = Buyer
@@ -208,20 +222,9 @@ def delete_user(request, user_type, user_id):
     })
 
 #product_list
-@login_required(login_url='admin-login')
+@admin_required
 def product_list(request):
     products = Product.objects.select_related('category', 'season').all()
-    query = request.GET.get('q', '').strip()
-    category_id = request.GET.get('category', '')
-    season_id = request.GET.get('season', '')
-
-    if query:
-        products = products.filter(name__icontains=query)
-    if category_id:
-        products = products.filter(category_id=category_id)
-    if season_id:
-        products = products.filter(season_id=season_id)
-
     categories = Category.objects.all()
     seasons = Season.objects.all()
 
@@ -229,14 +232,11 @@ def product_list(request):
         'products': products,
         'categories': categories,
         'seasons': seasons,
-        'query': query,
-        'selected_category': category_id,
-        'selected_season': season_id,
     })
 
 #add-product
 # Ensure user is logged in
-@login_required(login_url='admin-login')
+@admin_required
 def add_product(request):
     if request.method == 'POST':
         form = ProductForm(request.POST, request.FILES)  # include request.FILES here
@@ -259,7 +259,7 @@ def add_product(request):
 
 
 #edit_product
-@login_required(login_url='admin-login')
+@admin_required
 def edit_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
 
@@ -267,7 +267,8 @@ def edit_product(request, product_id):
         form = ProductForm(request.POST, request.FILES, instance=product)
         if form.is_valid():
             form.save()
-            return redirect('product_list')  # or wherever you want to redirect
+            messages.success(request, "Product updated successfully!")
+            return redirect('product_list')
     else:
         form = ProductForm(instance=product)
 
@@ -276,20 +277,22 @@ def edit_product(request, product_id):
 
     return render(request, 'accounts/product_edit.html', {
         'form': form,
+        'product': product,
         'category_count': category_count,
         'season_count': season_count,
     })
 #delete-product
-@login_required(login_url='admin-login')
+@admin_required
 def delete_product(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     if request.method == "POST":
+        messages.success(request, f"{product.name} deleted successfully!")
         product.delete()
         return redirect('product_list')
     return render(request, 'accounts/product_delete.html', {'product': product})
 
 #group by product
-@login_required(login_url='admin-login')
+@admin_required
 def grouped_product_list(request, group_by):
     # Step 1: Determine if we are working with category or season
     if group_by == 'category':
@@ -309,7 +312,7 @@ def grouped_product_list(request, group_by):
     if selected_group_id:
         try:
             selected_group = model_class.objects.get(id=selected_group_id)
-        except model_class.DoesNotExist:
+        except (model_class.DoesNotExist, ValueError):
             messages.error(request, "Selected group does not exist.")
             selected_group = None
     elif groups.exists():
@@ -340,7 +343,7 @@ def grouped_product_list(request, group_by):
     })
 
 #manage category/season
-@login_required(login_url='admin-login')
+@admin_required
 def manage_group(request, group_by):
     if group_by not in ['category', 'season']:
         messages.error(request, 'Invalid group type.')
@@ -360,7 +363,7 @@ def manage_group(request, group_by):
     })
 
 
-@login_required(login_url='admin-login')
+@admin_required
 def add_group(request, group_by):
     if group_by not in ['category', 'season']:
         messages.error(request, 'Invalid group type.')
@@ -382,7 +385,7 @@ def add_group(request, group_by):
     })
 
 
-@login_required(login_url='admin-login')
+@admin_required
 def edit_group(request, group_by, group_id):
     if group_by not in ['category', 'season']:
         messages.error(request, 'Invalid group type.')
@@ -413,7 +416,7 @@ def edit_group(request, group_by, group_id):
     })
 
 
-@login_required(login_url='admin-login')
+@admin_required
 def delete_group(request, group_by, group_id):
     if group_by not in ['category', 'season']:
         messages.error(request, 'Invalid group type.')
@@ -437,33 +440,62 @@ def delete_group(request, group_by, group_id):
     })
 
 #admin_order_list
-@login_required(login_url='admin-login')
+
+# Orders move forward one step at a time and can never be reverted or
+# skipped. Admin can advance pending -> approved -> shipped; only the
+# assigned supplier can advance shipped -> delivered (see supplier_home).
+# Once delivered, an order is fully locked: no status change, no supplier
+# reassignment, no deletion.
+ORDER_STATUS_FLOW = ['pending', 'approved', 'shipped', 'delivered']
+
+
+def _next_order_status(current_status):
+    try:
+        index = ORDER_STATUS_FLOW.index(current_status)
+    except ValueError:
+        return None
+    if index + 1 < len(ORDER_STATUS_FLOW):
+        return ORDER_STATUS_FLOW[index + 1]
+    return None
+
+
+@admin_required
 def admin_order_list(request):
-    orders = Order.objects.select_related('buyer', 'product', 'supplier').all().order_by('-order_date')
+    orders = OrderGroup.objects.select_related('buyer', 'supplier').prefetch_related('items__product').order_by('-order_date')
     suppliers = Supplier.objects.all()
-    status_choices = Order.STATUS_CHOICES
+    status_choices = OrderGroup.STATUS_CHOICES
     selected_status = request.GET.get('status', '').strip()
 
     if selected_status:
         orders = orders.filter(status=selected_status)
 
     if request.method == 'POST':
-        order_id = request.POST.get('order_id')
-        order = Order.objects.get(id=order_id)
+        order_id = request.POST.get('order_id', '')
+        order = OrderGroup.objects.filter(id=order_id).first() if order_id.isdigit() else None
 
-        if 'supplier_id' in request.POST:
-            supplier_id = request.POST.get('supplier_id')
-            if supplier_id:
-                order.supplier_id = supplier_id
-            else:
-                order.supplier_id = None
-            order.save()
+        if order and order.status != 'delivered':
+            if 'supplier_id' in request.POST:
+                supplier_id = request.POST.get('supplier_id')
+                if supplier_id:
+                    if Supplier.objects.filter(id=supplier_id).exists():
+                        order.supplier_id = supplier_id
+                        order.save()
+                else:
+                    order.supplier_id = None
+                    order.save()
 
-        elif 'status' in request.POST:
-            status = request.POST.get('status')
-            if status:
-                order.status = status
-            order.save()
+            elif 'status' in request.POST:
+                status = request.POST.get('status')
+                # Admin may only advance one step forward, and never all the
+                # way to 'delivered' - that transition belongs to the supplier.
+                # Shipping also requires a supplier already be assigned,
+                # otherwise the order becomes unreachable (no supplier
+                # dashboard will ever show it to mark delivered).
+                allowed_next = _next_order_status(order.status)
+                if (status and status == allowed_next and status != 'delivered'
+                        and not (status == 'shipped' and not order.supplier_id)):
+                    order.status = status
+                    order.save()
 
         return redirect('admin_order_list')
 
@@ -475,6 +507,25 @@ def admin_order_list(request):
     })
 
 
+@admin_required
+@require_POST
+def delete_order(request, order_id):
+    order = get_object_or_404(OrderGroup, id=order_id)
+    if order.status != 'pending':
+        messages.error(request, 'Only pending orders can be deleted.')
+        return redirect('admin_order_list')
+
+    with transaction.atomic():
+        for item in order.items.all():
+            product = Product.objects.select_for_update().get(id=item.product_id)
+            product.quantity += item.quantity
+            product.save()
+        order.delete()
+
+    messages.success(request, 'Order deleted and stock restored.')
+    return redirect('admin_order_list')
+
+
 
 
 # Logout
@@ -483,27 +534,27 @@ def admin_order_list(request):
 @csrf_protect
 def logout_view(request):
     if request.method == "POST":
+        # Buyer/supplier logins are session-only (no Django auth), so check
+        # for those session keys first. This matters when an admin is also
+        # signed in via Django auth in the same browser session — without
+        # this priority, clicking "Logout" on the buyer/supplier navbar would
+        # incorrectly bounce to the admin login page instead of clearing the
+        # buyer/supplier session.
+        if 'buyer_id' in request.session or 'supplier_id' in request.session:
+            request.session.pop('buyer_id', None)
+            request.session.pop('supplier_id', None)
+            messages.success(request, "You have logged out successfully.")
+            return redirect('buyer_home')
+
         if request.user.is_superuser:
-            # For superusers, log out normally (flush the session not required)
             logout(request)
             messages.success(request, "You have logged out successfully.")
             # Redirect superusers to admin-login page after logout
             return redirect('admin-login')
-        else:
-            # Normal user logout (only clear specific session keys)
-            if 'buyer_id' in request.session:
-                del request.session['buyer_id']
 
-            if 'supplier_id' in request.session:
-                del request.session['supplier_id']
-
-            # Manually restore the message storage after session flush
-            if not hasattr(request, '_messages'):
-                request._messages = FallbackStorage(request)
-
-            messages.success(request, "You have logged out successfully.")  # Or personalized message
-            logout(request)
-            return redirect('buyer_home')
+        logout(request)
+        messages.success(request, "You have logged out successfully.")
+        return redirect('buyer_home')
     else:
         # Check the user type and redirect accordingly if it's a GET request
         if request.user.is_authenticated:
@@ -519,6 +570,19 @@ def logout_view(request):
             # If the user is not authenticated, redirect to login
             return redirect('buyer_home')
 
+
+def csrf_failure(request, reason=""):
+    """A stale tab (open across a token-rotating event like an admin login)
+    will fail CSRF checks on its next form submit. Bounce back with a
+    friendly message instead of Django's raw 403 page - the fresh page
+    load that follows carries a valid token, so retrying just works."""
+    messages.error(request, "Your session expired. Please try again.")
+    referer = request.META.get('HTTP_REFERER')
+    if referer and url_has_allowed_host_and_scheme(
+        referer, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
+        return redirect(referer)
+    return redirect('buyer_home')
 
 
 #neutral entry point: let the visitor pick buyer or supplier (both are email-OTP only now)
@@ -569,9 +633,16 @@ def _cart_summary(cart):
 
 
 def _ajax_step(request, template, context, action_url):
+    # Django's messages framework only renders on a full page load (via the
+    # messages partial), which the modal never does - without forwarding
+    # them explicitly here, every messages.error()/warning() call before an
+    # _ajax_step() (wrong code, expired code, cooldown, send failure, ...)
+    # is silently swallowed and the user sees no feedback at all.
+    pending_messages = [{'text': str(m), 'tags': m.tags} for m in messages.get_messages(request)]
     return JsonResponse({
         'html': render_to_string(template, context, request=request),
         'action_url': action_url,
+        'messages': pending_messages,
     })
 
 
@@ -701,6 +772,8 @@ def _otp_verify_view(request, role):
 
             if not check_password(code, otp.code_hash):
                 otp.attempts += 1
+                if otp.attempts >= EmailOTP.MAX_ATTEMPTS:
+                    otp.is_used = True
                 otp.save()
                 messages.error(request, 'Incorrect code. Please try again.')
                 if ajax:
@@ -718,7 +791,7 @@ def _otp_verify_view(request, role):
             if account:
                 request.session[config['session_id_key']] = account.id
                 request.session['user_type'] = role
-                messages.success(request, f'Welcome back, {account.full_name}!')
+                messages.success(request, 'Login successful.')
                 target = _post_login_target(request, config)
                 if ajax:
                     return JsonResponse({'redirect': target})
@@ -809,14 +882,46 @@ def supplier_complete_profile(request):
     return _complete_profile_view(request, 'supplier')
 
 
+def _account_info_view(request, role):
+    config = ROLE_CONFIG[role]
+    ajax = _is_ajax(request)
+    account_id = request.session.get(config['session_id_key'])
+    if not account_id:
+        return _require_login(request, role)
+
+    account = get_object_or_404(config['model'], id=account_id)
+
+    if request.method == 'POST':
+        form = config['profile_form'](request.POST, instance=account)
+        if form.is_valid():
+            form.save()
+            if ajax:
+                return JsonResponse({'success': True, 'message': 'Your info has been updated.'})
+            messages.success(request, 'Your info has been updated.')
+            return redirect(config['home_url'])
+    else:
+        form = config['profile_form'](instance=account)
+
+    if ajax:
+        html = render_to_string('accounts/partials/account_info_form.html',
+                                 {'form': form, 'email': account.email}, request=request)
+        return JsonResponse({'success': False, 'html': html})
+    return render(request, 'accounts/account_info.html', {
+        'form': form, 'email': account.email, 'role': role, 'role_label': config['role_label'],
+    })
+
+
+def buyer_account_info(request):
+    return _account_info_view(request, 'buyer')
+
+def supplier_account_info(request):
+    return _account_info_view(request, 'supplier')
+
 
 #buyer_views
 
 #buyer-home
 def buyer_home(request):
-    categories = Category.objects.all().order_by('name')
-    seasons = Season.objects.all().order_by('name')
-
     products = Product.objects.select_related('category', 'season').all()
 
     query = request.GET.get('q', '').strip()
@@ -826,9 +931,9 @@ def buyer_home(request):
 
     if query:
         products = products.filter(name__icontains=query)
-    if selected_category_id:
+    if selected_category_id.isdigit():
         products = products.filter(category_id=selected_category_id)
-    if selected_season_id:
+    if selected_season_id.isdigit():
         products = products.filter(season_id=selected_season_id)
     if price_max:
         try:
@@ -842,8 +947,6 @@ def buyer_home(request):
     ).order_by('-created_at')[:8]
 
     context = {
-        'categories': categories,
-        'seasons': seasons,
         'products': featured_products,
         'new_arrivals': new_arrivals,
         'wishlist_ids': request.session.get('wishlist', []),
@@ -870,9 +973,9 @@ def buyer_category_page(request):
 
     if query:
         products = products.filter(name__icontains=query)
-    if selected_category_id:
+    if selected_category_id.isdigit():
         products = products.filter(category_id=selected_category_id)
-    if selected_season_id:
+    if selected_season_id.isdigit():
         products = products.filter(season_id=selected_season_id)
     if price_max:
         try:
@@ -945,6 +1048,7 @@ def cart_view(request):
     })
 
 
+@require_POST
 def add_to_cart(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     cart = request.session.get('cart', {})
@@ -993,11 +1097,14 @@ def add_to_cart(request, product_id):
     return redirect('cart')
 
 
+@require_POST
 def decrease_cart_quantity(request, product_id):
     cart = request.session.get('cart', {})
     product_key = str(product_id)
     item = cart.get(product_key)
-    removed = False
+    # Already gone (e.g. removed from another tab) - treat as removed so the
+    # UI drops the row instead of showing a lingering "0 qty" line.
+    removed = item is None
     new_quantity = 0
 
     if item:
@@ -1029,6 +1136,7 @@ def decrease_cart_quantity(request, product_id):
     return redirect('cart')
 
 
+@require_POST
 def remove_from_cart(request, product_id):
     cart = request.session.get('cart', {})
     cart.pop(str(product_id), None)
@@ -1053,6 +1161,7 @@ def wishlist_view(request):
     return render(request, 'accounts/wishlist.html', {'products': products})
 
 
+@require_POST
 def toggle_wishlist(request, product_id):
     product = get_object_or_404(Product, id=product_id)
     wishlist = request.session.get('wishlist', [])
@@ -1078,7 +1187,12 @@ def toggle_wishlist(request, product_id):
         })
 
     messages.success(request, message)
-    return redirect(request.META.get('HTTP_REFERER', 'buyer_home'))
+    referer = request.META.get('HTTP_REFERER')
+    if referer and url_has_allowed_host_and_scheme(
+        referer, allowed_hosts={request.get_host()}, require_https=request.is_secure()
+    ):
+        return redirect(referer)
+    return redirect('buyer_home')
 
 #product detail
 def buyer_product_detail(request, user_type, product_id):
@@ -1103,7 +1217,7 @@ def buyer_orders(request):
     buyer_id = request.session.get('buyer_id')
     if not buyer_id:
         return _require_login(request, 'buyer')
-    orders = Order.objects.filter(buyer_id=buyer_id).order_by('-order_date')
+    orders = OrderGroup.objects.filter(buyer_id=buyer_id).prefetch_related('items__product').order_by('-order_date')
     return render(request, 'accounts/buyer_orders.html', {'orders': orders})
 
 #checkout - converts the cart into real orders
@@ -1152,18 +1266,22 @@ def checkout_view(request):
 
         try:
             with transaction.atomic():
+                order_group = OrderGroup.objects.create(
+                    buyer=buyer,
+                    delivery_address=delivery_address,
+                    phone_number=phone_number,
+                )
                 for cart_item in cart_items:
                     # Re-check stock inside the transaction to avoid race conditions
                     product = Product.objects.select_for_update().get(id=cart_item['product'].id)
                     if cart_item['quantity'] > product.quantity:
                         raise ValueError(f'Not enough stock for {product.name}.')
 
-                    Order.objects.create(
-                        buyer=buyer,
+                    OrderItem.objects.create(
+                        order=order_group,
                         product=product,
                         quantity=cart_item['quantity'],
-                        delivery_address=delivery_address,
-                        phone_number=phone_number,
+                        unit_price=product.price,
                     )
                     product.quantity -= cart_item['quantity']
                     product.save()
@@ -1196,16 +1314,17 @@ def supplier_home(request):
     supplier = get_object_or_404(Supplier, id=supplier_id)
 
     # Fetch orders assigned to the supplier
-    orders = Order.objects.filter(supplier_id=supplier_id).order_by('-order_date')
-    # Handle status update
+    orders = OrderGroup.objects.select_related('buyer').prefetch_related('items').filter(supplier_id=supplier_id).order_by('-order_date')
+    # Handle status update - a supplier may only mark a shipped order delivered
     if request.method == "POST":
-        order_id = request.POST.get('order_id')
+        order_id = request.POST.get('order_id', '')
         status = request.POST.get('status')
 
-        # Update the order status
-        order = Order.objects.get(id=order_id)
-        order.status = status
-        order.save()
+        if status == 'delivered' and order_id.isdigit():
+            order = OrderGroup.objects.filter(id=order_id, supplier_id=supplier_id, status='shipped').first()
+            if order:
+                order.status = 'delivered'
+                order.save()
 
         return redirect('supplier_home')
 

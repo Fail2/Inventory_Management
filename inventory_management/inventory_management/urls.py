@@ -16,13 +16,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.conf import settings
-from django.conf.urls.static import static
-from django.urls import path,include
+from django.urls import path, include, re_path
+from django.views.static import serve
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/',include('accounts.urls')),
 ]
-# This serves media files in development (make sure to only use this in development)
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+
+# Serve uploaded product images in every environment. Django's static() url
+# helper (the usual dev-only shortcut) silently no-ops whenever DEBUG=False,
+# which meant product pictures returned 404 in production with no media/
+# route at all. There's no CDN/S3 in front of this app, so Django serves
+# media directly - fine at this project's scale, though it does mean
+# uploaded files live on Render's ephemeral disk (see deployment notes).
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+]

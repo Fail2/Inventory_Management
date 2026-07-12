@@ -4,37 +4,33 @@
 
 {% block extra_css %}
 <style>
-    .dashboard-shell {
-        display: grid;
-        gap: 20px;
-    }
-
     .summary-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 14px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
     }
 
     .summary-card {
         background: white;
-        border-radius: 14px;
-        padding: 16px 18px;
-        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
-        border: 1px solid #e2e8f0;
+        border-radius: var(--radius-lg);
+        padding: 18px 20px;
+        box-shadow: var(--card-shadow);
+        border: 1px solid var(--border);
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 14px;
     }
 
     .summary-card .card-icon {
-        width: 42px;
-        height: 42px;
+        width: 46px;
+        height: 46px;
         border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
         color: white;
         font-size: 18px;
+        flex-shrink: 0;
     }
 
     .summary-card.blue .card-icon { background: linear-gradient(135deg, #2563eb, #3b82f6); }
@@ -43,87 +39,45 @@
     .summary-card.purple .card-icon { background: linear-gradient(135deg, #7c3aed, #a855f7); }
 
     .summary-card h3 {
-        margin: 0 0 2px;
-        font-size: 13px;
-        color: #64748b;
+        margin: 0 0 4px;
+        font-size: 12px;
+        color: var(--text-muted);
         text-transform: uppercase;
         letter-spacing: 0.06em;
+        font-weight: 600;
     }
 
     .summary-card .value {
         font-size: 24px;
         font-weight: 700;
-        color: #0f172a;
+        color: var(--text);
+        line-height: 1.1;
     }
 
-    .panel {
-        background: white;
-        border-radius: 14px;
-        padding: 18px 20px;
-        box-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
-        border: 1px solid #e2e8f0;
+    .panels-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 20px;
     }
 
-    .panel-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 12px;
-    }
-
-    .panel-header h2 {
-        margin: 0;
-        font-size: 18px;
-        color: #111827;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    th, td {
-        padding: 10px;
-        text-align: left;
-        border-bottom: 1px solid #e5e7eb;
-    }
-
-    th {
-        background: #f8fafc;
-        color: #475569;
-        font-size: 13px;
-        text-transform: uppercase;
-        letter-spacing: 0.04em;
-    }
-
-    tbody tr:hover {
-        background: #f8fafc;
-    }
-
-    .badge {
-        display: inline-block;
-        padding: 4px 10px;
-        border-radius: 999px;
-        font-size: 12px;
-        background: #e9f7ef;
-        color: #1f7a3d;
-        text-transform: capitalize;
-    }
-
-    .badge.warning {
-        background: #fff4e5;
-        color: #b45309;
-    }
-
-    .muted {
-        color: #6c757d;
-        font-size: 13px;
-    }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #e5e7eb; vertical-align: middle; }
+    th { background: #f8fafc; color: #475569; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; font-weight: 600; }
+    tbody tr:hover { background: #f8fafc; }
+    td.numeric, th.numeric { text-align: right; }
+    td.center, th.center { text-align: center; }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="dashboard-shell">
+<div class="page-shell">
+    <div class="page-header">
+        <div>
+            <h2>Dashboard</h2>
+            <p>An overview of orders, inventory, and accounts.</p>
+        </div>
+    </div>
+
     <div class="summary-grid">
         <div class="summary-card blue">
             <div class="card-icon"><i class="fas fa-shopping-cart"></i></div>
@@ -155,66 +109,68 @@
         </div>
     </div>
 
-    <div class="panel">
-        <div class="panel-header">
-            <h2>Low Stock Alert</h2>
-            <span class="muted">Items needing attention</span>
+    <div class="panels-grid">
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Recent Orders</h2>
+                <span class="muted">Latest pending orders</span>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Order Number</th>
+                        <th>Buyer Email</th>
+                        <th>Supplier Email</th>
+                        <th>Date</th>
+                        <th class="center">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr>
+                        <td>#{{ order.id }}</td>
+                        <td>{{ order.buyer.email }}</td>
+                        <td>{% if order.supplier %}{{ order.supplier.email }}{% else %}<span class="muted">Unassigned</span>{% endif %}</td>
+                        <td>{{ order.order_date|date:"Y-m-d" }}</td>
+                        <td class="center"><span class="badge badge-{{ order.status }}"><i class="fas fa-circle"></i> {{ order.status|capfirst }}</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="muted">No pending orders.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Quantity</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for product in low_stock_products %}
-                <tr>
-                    <td>{{ product.name }}</td>
-                    <td>{{ product.quantity }}</td>
-                    <td><span class="badge warning">Low stock</span></td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="3" class="muted">No low-stock products.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
 
-    <div class="panel">
-        <div class="panel-header">
-            <h2>Recent Orders</h2>
-            <span class="muted">Latest activity</span>
+        <div class="panel">
+            <div class="panel-header">
+                <h2>Low Stock Alert</h2>
+                <span class="muted">Items needing attention</span>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th class="numeric">Quantity</th>
+                        <th class="center">Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in low_stock_products %}
+                    <tr>
+                        <td>{{ product.name }}</td>
+                        <td class="numeric">{{ product.quantity }}</td>
+                        <td class="center"><span class="badge warning"><i class="fas fa-circle"></i> Low stock</span></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="muted">No low-stock products.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
-        <table>
-            <thead>
-                <tr>
-                    <th>Product</th>
-                    <th>Buyer</th>
-                    <th>Supplier</th>
-                    <th>Date</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for order in orders %}
-                <tr>
-                    <td>{{ order.product.name }}</td>
-                    <td>{{ order.buyer.full_name }}</td>
-                    <td>{% if order.supplier %}{{ order.supplier.full_name }}{% else %}Unassigned{% endif %}</td>
-                    <td>{{ order.order_date|date:"Y-m-d" }}</td>
-                    <td><span class="badge">{{ order.status|capfirst }}</span></td>
-                </tr>
-                {% empty %}
-                <tr>
-                    <td colspan="5" class="muted">No orders available.</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
     </div>
 </div>
 {% endblock %}

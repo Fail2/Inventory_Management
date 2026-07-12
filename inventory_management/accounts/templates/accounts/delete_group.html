@@ -3,32 +3,13 @@
 
 {% block content %}
 <div class="confirm-card">
+    <div class="confirm-icon"><i class="fas fa-triangle-exclamation"></i></div>
     <h2>Delete {{ group_by|title }}</h2>
-    <p>Are you sure you want to delete <strong>{{ group.name }}</strong>?</p>
-    <form method="post">
+    <p>Are you sure you want to delete <strong>{{ group.name }}</strong>? This cannot be undone.</p>
+    <form method="post" class="confirm-actions">
         {% csrf_token %}
-        <div class="button-group">
-            <button type="submit" class="btn btn-danger">Delete</button>
-            <a href="{% url 'manage_group' group_by %}" class="btn btn-secondary">Cancel</a>
-        </div>
+        <button type="submit" class="btn btn-danger"><i class="fas fa-trash"></i> Delete</button>
+        <a href="{% url 'manage_group' group_by %}" class="btn btn-secondary">Cancel</a>
     </form>
 </div>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-    .confirm-card {
-        max-width: 520px;
-        margin: 0 auto;
-        padding: 30px;
-        background: #fff;
-        border-radius: 14px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-        text-align: center;
-    }
-    .button-group { display: flex; justify-content: center; gap: 12px; margin-top: 20px; }
-    .btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 16px; border-radius: 8px; text-decoration: none; border: 0; cursor: pointer; }
-    .btn-danger { background: #dc2626; color: white; }
-    .btn-secondary { background: #e2e8f0; color: #0f172a; }
-</style>
 {% endblock %}

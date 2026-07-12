@@ -2,171 +2,49 @@
 {% block title %}Edit Product{% endblock %}
 
 {% block content %}
-<div class="form-container">
-    <div class="form-header">
-        <h2>Edit Product</h2>
-        <a href="{% url 'product_list' %}" class="btn cancel-btn">Cancel</a>
+<div class="form-card">
+    <div class="form-card-header">
+        <div>
+            <h2>Edit Product{% if product %}: {{ product.name }}{% endif %}</h2>
+            <p>Update inventory details, pricing, and stock.</p>
+        </div>
     </div>
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
-        {% for field in form %}
-            {% if field.name == 'category' %}
-                {% if category_count > 0 %}
-                <div class="form-group">
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.help_text %}
-                        <small class="help-text">{{ field.help_text }}</small>
+        <div class="form-card-body">
+            {% for field in form %}
+                {% if field.name == 'category' %}
+                    {% if category_count > 0 %}
+                    <div class="field-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}<div class="field-help">{{ field.help_text }}</div>{% endif %}
+                        {% if field.errors %}<ul class="field-errors">{% for error in field.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
                     {% endif %}
-                    {% for error in field.errors %}
-                        <div class="error-message">{{ error }}</div>
-                    {% endfor %}
-                </div>
+                {% elif field.name == 'season' %}
+                    {% if season_count > 0 %}
+                    <div class="field-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}<div class="field-help">{{ field.help_text }}</div>{% endif %}
+                        {% if field.errors %}<ul class="field-errors">{% for error in field.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
+                    {% endif %}
+                {% else %}
+                    <div class="field-group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}<div class="field-help">{{ field.help_text }}</div>{% endif %}
+                        {% if field.errors %}<ul class="field-errors">{% for error in field.errors %}<li>{{ error }}</li>{% endfor %}</ul>{% endif %}
+                    </div>
                 {% endif %}
-            {% elif field.name == 'season' %}
-                {% if season_count > 0 %}
-                <div class="form-group">
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.help_text %}
-                        <small class="help-text">{{ field.help_text }}</small>
-                    {% endif %}
-                    {% for error in field.errors %}
-                        <div class="error-message">{{ error }}</div>
-                    {% endfor %}
-                </div>
-                {% endif %}
-            {% else %}
-                <div class="form-group">
-                    <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                    {{ field }}
-                    {% if field.help_text %}
-                        <small class="help-text">{{ field.help_text }}</small>
-                    {% endif %}
-                    {% for error in field.errors %}
-                        <div class="error-message">{{ error }}</div>
-                    {% endfor %}
-                </div>
-            {% endif %}
-        {% endfor %}
-        <div class="form-actions">
-            <button type="submit" class="btn submit-btn">Save Changes</button>
+            {% endfor %}
+        </div>
+        <div class="form-card-actions">
+            <button type="submit" class="btn btn-success"><i class="fas fa-check"></i> Save Changes</button>
+            <a href="{% url 'product_list' %}" class="btn btn-secondary">Cancel</a>
         </div>
     </form>
 </div>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-    /* Container styling */
-    .form-container {
-        max-width: 700px;
-        margin: 0 auto;
-        padding: 30px;
-        background-color: #ffffff;
-        border-radius: 14px;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-        font-family: Arial, sans-serif;
-    }
-
-    /* Header styling */
-    .form-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 20px;
-    }
-
-    .form-header h2 {
-        margin: 0;
-        font-size: 24px;
-        color: #333333;
-    }
-
-    /* Form group styling */
-    .form-group {
-        margin-bottom: 20px;
-    }
-
-    .form-group label {
-        display: block;
-        margin-bottom: 6px;
-        font-weight: 600;
-        color: #555555;
-    }
-
-    .form-group input,
-    .form-group select,
-    .form-group textarea {
-        width: 100%;
-        padding: 10px 12px;
-        border: 1px solid #cccccc;
-        border-radius: 4px;
-        font-size: 14px;
-        transition: border-color 0.3s;
-    }
-
-    .form-group input:focus,
-    .form-group select:focus,
-    .form-group textarea:focus {
-        border-color: #66afe9;
-        outline: none;
-    }
-
-    .help-text {
-        display: block;
-        margin-top: 4px;
-        font-size: 12px;
-        color: #777777;
-    }
-
-    .error-message {
-        margin-top: 4px;
-        font-size: 13px;
-        color: #d9534f;
-    }
-
-    /* Button styling */
-    .form-actions {
-        text-align: right;
-    }
-
-    .btn {
-        display: inline-block;
-        padding: 10px 20px;
-        font-size: 14px;
-        font-weight: 600;
-        text-decoration: none;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-    }
-
-    .empty-state {
-        padding: 10px 12px;
-        border: 1px dashed #c7c7c7;
-        border-radius: 6px;
-        background: #f8f9fa;
-        color: #6c757d;
-        font-size: 13px;
-    }
-
-    .submit-btn {
-        background-color: #28a745;
-        color: #ffffff;
-    }
-
-    .submit-btn:hover {
-        background-color: #218838;
-    }
-
-    .cancel-btn {
-        background-color: #6c757d;
-        color: #ffffff;
-    }
-
-    .cancel-btn:hover {
-        background-color: #5a6268;
-    }
-</style>
 {% endblock %}

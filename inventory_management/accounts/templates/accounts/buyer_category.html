@@ -8,12 +8,16 @@
     .filters h3 { margin: 0 0 12px; font-size: 16px; }
     .filter-group { margin-bottom: 14px; }
     .filter-group label { display: block; margin-bottom: 6px; font-size: 13px; color: #475569; font-weight: 600; }
-    .filter-group select, .filter-group input { width: 100%; padding: 8px 10px; border-radius: 10px; border: 1px solid #cbd5e1; }
+    .filter-group select, .filter-group input {
+        width: 100%; padding: 8px 10px; border-radius: 10px; border: 1px solid #cbd5e1;
+        font-family: inherit; font-size: 14px; box-sizing: border-box;
+        transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .filter-group select:focus, .filter-group input:focus {
+        outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+    }
     .results { display: grid; gap: 16px; }
-    .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 260px)); justify-content: start; gap: 16px; }
     .empty-state { background: white; border-radius: 18px; padding: 24px; box-shadow: 0 10px 25px rgba(15,23,42,0.06); border: 1px solid #e2e8f0; text-align: center; color: #64748b; }
-    .btn { display: inline-block; width: 100%; text-align: center; background: #111827; color: white; padding: 10px 12px; border-radius: 999px; text-decoration: none; margin-top: 10px; border: none; cursor: pointer; font-family: inherit; font-size: 14px; box-sizing: border-box; }
-    .btn:disabled { opacity: 0.6; cursor: default; }
     .scroll-status { text-align: center; padding: 16px; color: #64748b; font-size: 14px; }
     @media (max-width: 960px) { .shop-shell { grid-template-columns: 1fr; } }
 </style>
@@ -50,7 +54,6 @@
                 <label for="price_max">Max Price</label>
                 <input id="price_max" name="price_max" type="number" min="0" value="{{ price_max }}" placeholder="e.g. 200">
             </div>
-            <button class="btn" type="submit">Apply Filters</button>
         </form>
     </aside>
 
@@ -61,7 +64,7 @@
         </div>
         <div id="emptyState" class="empty-state" {% if products %}style="display:none;"{% endif %}>No products match your filters.</div>
         <div id="resultsWrap" {% if not products %}style="display:none;"{% endif %}>
-            <div class="products" id="productGrid">
+            <div class="product-grid" id="productGrid">
                 {% include 'accounts/partials/product_card_list.html' %}
             </div>
             <div id="scrollSentinel" class="scroll-status"
@@ -80,8 +83,8 @@
     var resultsWrap = document.getElementById('resultsWrap');
     var emptyState = document.getElementById('emptyState');
     var totalCountEl = document.getElementById('totalCount');
-    var submitBtn = form.querySelector('button[type="submit"]');
     var loading = false;
+    var debounceTimer = null;
 
     function currentUrl(params) {
         var query = params.toString();
@@ -105,7 +108,6 @@
 
     function loadFiltered(params, pushUrl) {
         loading = true;
-        if (submitBtn) submitBtn.disabled = true;
 
         fetch(currentUrl(params), { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
             .then(function (r) { return r.json(); })
@@ -113,11 +115,9 @@
                 applyResponse(data, true);
                 if (pushUrl) window.history.pushState({}, '', currentUrl(params));
                 loading = false;
-                if (submitBtn) submitBtn.disabled = false;
             })
             .catch(function () {
                 loading = false;
-                if (submitBtn) submitBtn.disabled = false;
             });
     }
 
@@ -141,10 +141,32 @@
             });
     }
 
-    form.addEventListener('submit', function (e) {
-        e.preventDefault();
+    function runFilterNow() {
+        clearTimeout(debounceTimer);
         var params = new URLSearchParams(new FormData(form));
         loadFiltered(params, true);
+    }
+
+    function scheduleFilter() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(runFilterNow, 350);
+    }
+
+    // Real-time filtering: text/number fields debounce while typing,
+    // selects apply immediately on change. No submit button needed.
+    form.addEventListener('input', function (e) {
+        if (e.target.tagName === 'SELECT') return;
+        scheduleFilter();
+    });
+
+    form.addEventListener('change', function (e) {
+        if (e.target.tagName === 'SELECT') runFilterNow();
+    });
+
+    // Still guard against native submission (e.g. pressing Enter in a field)
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        runFilterNow();
     });
 
     window.addEventListener('popstate', function () {
