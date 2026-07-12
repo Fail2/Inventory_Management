@@ -34,7 +34,6 @@ services:
 # instead of silently falling back to a throwaway local SQLite file.
 databases:
   - name: inventory-management-db
-    engine: postgresql
-    version: "15"
+    postgresMajorVersion: "15"
     region: oregon
     plan: starter
