@@ -1,0 +1,99 @@
+{% extends 'accounts/buyer_base.html' %}
+{% block title %}Checkout{% endblock %}
+
+{% block extra_css %}
+<style>
+    .checkout-shell { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 16px; }
+    .card { background: white; border-radius: 20px; padding: 18px; box-shadow: 0 10px 25px rgba(15,23,42,0.06); border: 1px solid #e2e8f0; }
+    .items { display: grid; gap: 12px; }
+    .item { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid #e5e7eb; }
+    .item:last-child { border-bottom: none; }
+    .form-grid { display: grid; gap: 12px; }
+    .form-grid label { font-weight: 600; color: #334155; font-size: 14px; }
+    .form-grid textarea, .form-grid input { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid #cbd5e1; font-family: inherit; box-sizing: border-box; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 14px; border-radius: 999px; text-decoration: none; font-weight: 700; border: none; cursor: pointer; }
+    .btn-primary { background: #111827; color: white; }
+    .btn-secondary { background: #f1f5f9; color: #0f172a; }
+    .btn:disabled { opacity: 0.6; cursor: default; }
+    .form-error { display: none; color: #dc2626; font-size: 14px; margin: 0; }
+    @media (max-width: 900px) { .checkout-shell { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="checkout-shell">
+    <div class="card">
+        <h2 style="margin-top:0;">Order Summary</h2>
+        <div class="items">
+            {% for item in cart_items %}
+            <div class="item">
+                <div>
+                    <strong>{{ item.product.name }}</strong><br>
+                    <span class="muted">Qty: {{ item.quantity }}</span>
+                </div>
+                <div>${{ item.line_total }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+            <strong>Total: ${{ total }}</strong>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2 style="margin-top:0;">Delivery Details</h2>
+        <form method="post" class="form-grid" id="checkoutForm">
+            {% csrf_token %}
+            <p class="form-error" id="checkoutError"></p>
+            <label for="delivery_address">Delivery Address</label>
+            <textarea id="delivery_address" name="delivery_address" rows="4" required>{{ buyer.address }}</textarea>
+            <label for="phone_number">Phone Number</label>
+            <input type="tel" id="phone_number" name="phone_number" value="{{ phone_number|default:'' }}" required>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <button class="btn btn-primary" type="submit">Place Order</button>
+                <a class="btn btn-secondary" href="{% url 'cart' %}">Back to Cart</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function () {
+    var form = document.getElementById('checkoutForm');
+    var errorEl = document.getElementById('checkoutError');
+    var submitBtn = form.querySelector('button[type="submit"]');
+
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        submitBtn.disabled = true;
+        errorEl.style.display = 'none';
+
+        fetch(form.action || window.location.href, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: new FormData(form)
+        })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.success) {
+                    window.location.href = data.redirect;
+                    return;
+                }
+                submitBtn.disabled = false;
+                errorEl.textContent = data.message;
+                errorEl.style.display = 'block';
+                if (data.redirect) {
+                    setTimeout(function () { window.location.href = data.redirect; }, 1800);
+                }
+            })
+            .catch(function () {
+                submitBtn.disabled = false;
+                errorEl.textContent = 'Something went wrong. Please try again.';
+                errorEl.style.display = 'block';
+            });
+    });
+})();
+</script>
+{% endblock %}

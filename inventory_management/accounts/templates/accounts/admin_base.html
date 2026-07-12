@@ -195,8 +195,8 @@
         <a href="{% url 'admin_dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
         <a href="{% url 'user_list' 'supplier' %}"><i class="fas fa-user"></i> Supplier</a>
         <a href="{% url 'user_list' 'buyer' %}"><i class="fas fa-users"></i> Buyer</a>
-        <a href="{% url 'grouped_product_list' 'season' %}"><i class="fas fa-calendar-alt"></i> Season</a>
-        <a href="{% url 'grouped_product_list' 'category' %}"><i class="fas fa-list"></i> Category</a>
+        <a href="{% url 'manage_group' 'season' %}"><i class="fas fa-calendar-alt"></i> Season</a>
+        <a href="{% url 'manage_group' 'category' %}"><i class="fas fa-list"></i> Category</a>
         <a href="{% url 'product_list' %}"><i class="fas fa-box"></i> Product</a>
         <a href="{% url 'admin_order_list' %}"><i class="fas fa-shopping-cart"></i> Order</a>
         <form method="post" action="{% url 'logout' %}">

@@ -3,6 +3,7 @@ from decimal import Decimal, InvalidOperation
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import MinValueValidator
+from django.utils import timezone
 import os
 import uuid
 from django.utils.deconstruct import deconstructible
@@ -22,8 +23,6 @@ class Buyer(models.Model):
     full_name=models.CharField(max_length=100)
     address = models.TextField()
     email = models.EmailField(unique=True)
-    username = models.CharField(max_length=100,unique=True)
-    password =models.CharField(max_length=128) #store hashed password
     last_login = models.DateTimeField(null=True, blank=True)
     date_joined = models.DateTimeField(auto_now_add=True)
 
@@ -35,14 +34,12 @@ class Supplier(models.Model):
     full_name=models.CharField(max_length=100)
     address = models.TextField()
     email = models.EmailField(unique=True)
-    username = models.CharField(max_length=100,unique=True)
-    password =models.CharField(max_length=128) #store hashed password
     last_login = models.DateTimeField(null=True, blank=True)
     date_joined = models.DateTimeField(auto_now_add=True)
 
 
     def __str__(self):
-        return self.full_name        
+        return self.full_name
 
 class Season(models.Model):
     name = models.CharField(max_length=100)
@@ -74,7 +71,7 @@ class Product(models.Model):
     price = models.DecimalField(max_digits=10, decimal_places=2,validators=[MinValueValidator(0.01)])
     quantity = models.PositiveIntegerField()
     picture = models.ImageField(upload_to=UniqueFileName('product_images/'), null=True, blank=True)
-    supplier = models.ForeignKey(Supplier, on_delete=models.SET_NULL, null=True, blank=True)  # Now optional
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
@@ -108,6 +105,7 @@ class Order(models.Model):
     quantity = models.PositiveIntegerField()
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
     delivery_address = models.TextField(blank=False)  # <- NEW FIELD for where to send
+    phone_number = models.CharField(max_length=20, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     order_date = models.DateTimeField(auto_now_add=True)
 
@@ -124,10 +122,24 @@ class Order(models.Model):
                 self.total_amount = None
         super().save(*args, **kwargs)
 
-class Delivery(models.Model):
-    order = models.OneToOneField(Order, on_delete=models.CASCADE)
-    delivery_date = models.DateField()
-    status = models.CharField(max_length=50)
+#one-time passcode used for passwordless buyer/supplier login
+class EmailOTP(models.Model):
+    ROLE_CHOICES = (
+        ('buyer', 'Buyer'),
+        ('supplier', 'Supplier'),
+    )
+    email = models.EmailField()
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='buyer')
+    code_hash = models.CharField(max_length=128)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_used = models.BooleanField(default=False)
+    attempts = models.PositiveSmallIntegerField(default=0)
+
+    MAX_ATTEMPTS = 5
+
+    def is_expired(self):
+        return timezone.now() > self.expires_at
 
     def __str__(self):
-        return f"Delivery for {self.order}"        
+        return f"OTP for {self.email} ({self.role})"

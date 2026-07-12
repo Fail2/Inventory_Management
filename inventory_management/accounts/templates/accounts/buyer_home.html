@@ -1,106 +1,138 @@
 {% extends 'accounts/buyer_base.html' %}
-{% block title %}Product List{% endblock %}
+{% block title %}Luxury Store{% endblock %}
 
 {% block extra_css %}
 <style>
-    .product-grid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 20px;
-        justify-content: center;
-    }
-    .product-card {
-        background: white;
-        border: 1px solid #ddd;
-        border-radius: 8px;
-        padding: 10px;
-        width: 200px;
-        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
-        text-align: center;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        justify-content: space-between;
-    }
-    .product-card img {
-        max-width: 100%;
-        height: auto;
-        border-radius: 4px;
-    }
-    .product-card-content h5 {
-        margin: 10px 0 5px;
-        font-size: 18px;
-    }
-    .product-card-content p {
-        margin: 5px 0;
-    }
-    .filter-form {
-        text-align: center;
-        margin-bottom: 20px;
-    }
-    .filter-form select {
-        padding: 8px 12px;
-        font-size: 16px;
-    }
-    /* Hover effect */
-    .product-card:hover {
-        transform: scale(1.05);
-        box-shadow: 0 0 15px rgba(0, 0, 0, 0.2);
-    }
-    /* Styling for Buy Now button */
-    .buy-now-button {
-        background-color: #4CAF50;
+    .hero {
+        background: linear-gradient(135deg, #111827 0%, #1f2937 50%, #3b82f6 100%);
+        border-radius: 28px;
+        padding: 34px;
         color: white;
-        padding: 12px 0; /* Adjust padding */
-        border-radius: 5px;
-        font-size: 16px;
-        text-decoration: none;
-        display: inline-block;
-        transition: background-color 0.3s ease;
-        width: 100%; /* Ensure the button fits within the card width */
-        box-sizing: border-box; /* Include padding in the width calculation */
-        margin-top: auto; /* Push the button to the bottom of the card */
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 24px;
+        box-shadow: 0 20px 50px rgba(15,23,42,0.18);
+        margin-bottom: 24px;
     }
-    .buy-now-button:hover {
-        background-color: #45a049;
+
+    .hero h1 { font-size: 34px; margin: 0 0 10px; }
+    .hero p { color: #e2e8f0; margin-bottom: 16px; max-width: 560px; }
+    .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 42px; padding: 0 16px; border-radius: 999px; text-decoration: none; font-weight: 600; border: none; cursor: pointer; font-family: inherit; font-size: 14px; box-sizing: border-box; }
+    .btn-primary { background: white; color: #111827; }
+    .btn-secondary { background: rgba(255,255,255,0.14); color: white; border: 1px solid rgba(255,255,255,0.2); }
+
+    .hero-card {
+        background: rgba(255,255,255,0.16);
+        border: 1px solid rgba(255,255,255,0.18);
+        border-radius: 20px;
+        padding: 18px;
+        backdrop-filter: blur(16px);
     }
-    .buy-now-button:active {
-        background-color: #388e3c;
+
+    .section-title { display: flex; justify-content: space-between; align-items: center; margin: 24px 0 12px; }
+    .section-title h2 { margin: 0; font-size: 20px; }
+    .section-title a { color: #2563eb; text-decoration: none; font-weight: 600; }
+
+    .category-grid, .season-grid, .product-grid {
+        display: grid;
+        gap: 16px;
+    }
+
+    .category-grid { grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); }
+    .season-grid { grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); }
+    .product-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 260px)); justify-content: start; }
+
+    .card { background: white; border-radius: 18px; padding: 16px; box-shadow: 0 10px 25px rgba(15,23,42,0.06); border: 1px solid #e2e8f0; }
+    .category-card { text-align: center; padding: 18px 12px; text-decoration: none; color: inherit; display: block; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+    .category-card:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(15,23,42,0.1); }
+    .category-card i { font-size: 22px; color: #2563eb; margin-bottom: 8px; }
+    .season-card { min-height: 120px; display: flex; align-items: flex-end; color: white; font-weight: 700; text-decoration: none; transition: transform 0.15s ease; }
+    .season-card:hover { transform: translateY(-2px); }
+    .season-card span { background: rgba(17,24,39,0.35); padding: 10px 12px; border-radius: 999px; }
+    .muted { color: #64748b; font-size: 13px; }
+
+    @media (max-width: 900px) {
+        .hero { grid-template-columns: 1fr; }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<h2 style="text-align: center; margin-bottom: 20px;">Product List</h2>
-
-<form class="filter-form" method="get">
-    <label for="category-select">Filter by Category:</label>
-    <select name="category_id" id="category-select" onchange="this.form.submit()">
-        <option value="">All Categories</option>
-        {% for category in categories %}
-            <option value="{{ category.id }}" {% if selected_category_id|stringformat:'s' == category.id|stringformat:'s' %}selected{% endif %}>
-                {{ category.name }}
-            </option>
-        {% endfor %}
-    </select>
-</form>
-
-<div class="product-grid">
-    {% for product in products %}
-    
-        <div class="product-card">
-            <img src="{{ product.picture.url|default:'/media/product_images/default-image.jpg' }}" alt="{{ product.name }}">
-            <div class="product-card-content">
-                <h5>{{ product.name }}</h5>
-                <p>Price: ${{ product.price }}</p>
-                <p>Quantity: {{ product.quantity }}</p>
-            </div>
-            <a href="{% url 'buyer_product_detail' 'buyer' product.id %}" class="buy-now-button">Buy Now</a>
+<div class="hero">
+    <div>
+        <p class="pill soft">Seasonal Launch</p>
+        <h1>Curated essentials for every season.</h1>
+        <p>Discover premium picks, fresh arrivals, and exclusive offers designed to fit your lifestyle.</p>
+        <div class="hero-actions">
+            <a href="#featured-products" class="btn btn-primary">Shop Now</a>
+            <a href="#seasons" class="btn btn-secondary">Explore Collections</a>
         </div>
+    </div>
+    <div class="hero-card">
+        <div class="section-title" style="margin-top: 0;">
+            <h2>Featured Highlights</h2>
+        </div>
+        <p class="muted">Limited drops, best sellers, and premium quality in one elegant destination.</p>
+        <div class="meta-row">
+            <span class="pill">New Arrivals</span>
+            <span class="pill">Free Shipping</span>
+            <span class="pill">Premium Picks</span>
+        </div>
+    </div>
+</div>
+
+<div class="section-title">
+    <h2>Quick Categories</h2>
+    <a href="{% url 'buyer_category' %}">View all</a>
+</div>
+<div class="category-grid">
+    {% for category in categories %}
+    <a href="{% url 'buyer_category' %}?category_id={{ category.id }}" class="card category-card">
+        <i class="fas {% cycle 'fa-tshirt' 'fa-shoe-prints' 'fa-glasses' 'fa-gem' 'fa-mobile-alt' 'fa-couch' 'fa-tag' %}"></i>
+        <div>{{ category.name }}</div>
+    </a>
     {% empty %}
-        <p style="text-align: center; width: 100%;">No products found.</p>
+    <div class="card category-card muted">No categories yet.</div>
     {% endfor %}
 </div>
 
+<div class="section-title" id="seasons">
+    <h2>Shop by Season</h2>
+    <a href="{% url 'buyer_category' %}">See more</a>
+</div>
+<div class="season-grid">
+    {% for season in seasons %}
+    <a href="{% url 'buyer_category' %}?season_id={{ season.id }}" class="card season-card"
+       style="background: {% cycle 'linear-gradient(135deg,#f472b6,#fb7185)' 'linear-gradient(135deg,#fbbf24,#f59e0b)' 'linear-gradient(135deg,#34d399,#10b981)' 'linear-gradient(135deg,#60a5fa,#3b82f6)' 'linear-gradient(135deg,#a78bfa,#8b5cf6)' 'linear-gradient(135deg,#f87171,#ef4444)' %};">
+        <span>{{ season.name }}</span>
+    </a>
+    {% empty %}
+    <div class="card season-card muted" style="background:#f1f5f9; color:#64748b;">No seasons yet.</div>
+    {% endfor %}
+</div>
+
+{% if new_arrivals %}
+<div class="section-title" id="new-arrivals">
+    <h2>New Arrivals</h2>
+    <span class="muted">Added in the last 30 days</span>
+</div>
+<div class="product-grid">
+    {% for product in new_arrivals %}
+    {% include 'accounts/partials/product_card.html' %}
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="section-title" id="featured-products">
+    <h2>Featured Products</h2>
+    <a href="{% url 'buyer_category' %}">Browse all</a>
+</div>
+<div class="product-grid">
+    {% for product in products %}
+    {% include 'accounts/partials/product_card.html' %}
+    {% empty %}
+    <div class="card" style="grid-column: 1 / -1; text-align: center;">No products are available yet.</div>
+    {% endfor %}
+</div>
 {% endblock %}

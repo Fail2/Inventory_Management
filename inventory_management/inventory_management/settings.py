@@ -77,7 +77,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'accounts.middleware.auth_middleware.BuyerSupplierLoginRequiredMiddleware',
 ]
 
 ROOT_URLCONF = 'inventory_management.urls'
@@ -95,6 +94,8 @@ TEMPLATES = [
                 
                 # Register your context processor here
                 'accounts.context_processors.admin_stats',  # Correct reference
+                'accounts.context_processors.auth_status',
+                'accounts.context_processors.storefront_nav',
             ],
         },
     },

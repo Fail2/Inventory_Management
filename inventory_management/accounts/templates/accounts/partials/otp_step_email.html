@@ -1,0 +1,8 @@
+<h2>Welcome, {{ role_label }}</h2>
+<p class="modal-subtitle">Enter your email — we'll send you a one-time code to log in or sign up.</p>
+<form data-modal-form>
+    {% csrf_token %}
+    {{ form.email }}
+    {{ form.email.errors }}
+    <button type="submit">Send Code</button>
+</form>

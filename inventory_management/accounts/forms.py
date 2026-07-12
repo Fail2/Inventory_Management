@@ -1,50 +1,71 @@
 from django import forms
-from .models import Buyer,Supplier,Product,Category,Season,Order
+from .models import Buyer,Supplier,Product,Category,Season
 
-#using model method (Model Form) for buyer/supplier form
-class UserForm(forms.ModelForm):
-    password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
-        label="Password",
-        required= False #Make password optional in Admin edit mode
-    )
-    confirm_password = forms.CharField(
-        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
-        label="Confirm Password",
-        required= False #Make confirm password optional in Admin edit mode
+#buyer passwordless login/registration
+class EmailOTPRequestForm(forms.Form):
+    email = forms.EmailField(
+        widget=forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'you@example.com', 'autofocus': True}),
+        label="Email",
     )
 
+class OTPVerifyForm(forms.Form):
+    code = forms.CharField(
+        max_length=6,
+        min_length=6,
+        widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '6-digit code', 'autofocus': True, 'inputmode': 'numeric'}),
+        label="Verification Code",
+    )
+
+    def clean_code(self):
+        code = self.cleaned_data['code']
+        if not code.isdigit():
+            raise forms.ValidationError("Enter the 6-digit code we emailed you.")
+        return code
+
+#shown to a brand-new buyer/supplier right after their email is verified
+class BuyerProfileForm(forms.ModelForm):
     class Meta:
-        model = Buyer  # Default, but we will override dynamically!
-        fields = ['full_name', 'address', 'email', 'username', 'password']
+        model = Buyer
+        fields = ['full_name', 'address']
+        widgets = {
+            'full_name': forms.TextInput(attrs={'class': 'form-control', 'autofocus': True}),
+            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
+class SupplierProfileForm(forms.ModelForm):
+    class Meta:
+        model = Supplier
+        fields = ['full_name', 'address']
+        widgets = {
+            'full_name': forms.TextInput(attrs={'class': 'form-control', 'autofocus': True}),
+            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+        }
+
+#admin forms for managing buyer/supplier records directly (no password - everyone logs in via email OTP)
+class BuyerAdminForm(forms.ModelForm):
+    class Meta:
+        model = Buyer
+        fields = ['full_name', 'address', 'email']
         widgets = {
             'full_name': forms.TextInput(attrs={'class': 'form-control'}),
             'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
-            'username': forms.TextInput(attrs={'class': 'form-control'}),
         }
 
-    def __init__(self, *args, **kwargs):
-        model_class = kwargs.pop('model_class', None)
-        if model_class:
-            self._meta.model = model_class  # dynamically set model (Buyer/Supplier)
-        super(UserForm, self).__init__(*args, **kwargs)
-    
-
-    def clean(self):
-        cleaned_data = super().clean()
-        password = cleaned_data.get("password")
-        confirm_password = cleaned_data.get("confirm_password")
-
-        if password and confirm_password and password != confirm_password:
-            raise forms.ValidationError("Passwords do not match!")
-
-        return cleaned_data
+class SupplierAdminForm(forms.ModelForm):
+    class Meta:
+        model = Supplier
+        fields = ['full_name', 'address', 'email']
+        widgets = {
+            'full_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+        }
 
 class ProductForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['name', 'category', 'season', 'price', 'quantity', 'picture', 'supplier']
+        fields = ['name', 'category', 'season', 'price', 'quantity', 'picture']
 
         widgets = {
             'name': forms.TextInput(attrs={'class': 'form-control'}),
@@ -53,7 +74,6 @@ class ProductForm(forms.ModelForm):
             'price': forms.NumberInput(attrs={'class': 'form-control'}),
             'quantity': forms.NumberInput(attrs={'class': 'form-control'}),
             'picture': forms.ClearableFileInput(attrs={'class': 'form-control'}),
-            'supplier': forms.Select(attrs={'class': 'form-control'}),
         }
 
     def __init__(self, *args, **kwargs):
@@ -61,29 +81,16 @@ class ProductForm(forms.ModelForm):
 
         self.fields['category'].empty_label = 'None'
         self.fields['season'].empty_label = 'None'
-        self.fields['supplier'].empty_label = 'None'
         # Make optional fields not required in the form
         self.fields['category'].required = False
         self.fields['season'].required = False
         self.fields['picture'].required = False
-        self.fields['supplier'].required = False    
         
     def clean_price(self):
          price = self.cleaned_data.get('price')
          if price is not None and price < 0:
            raise forms.ValidationError("Price cannot be negative.")
          return price
-
-class CategoryForm(forms.ModelForm):
-    class Meta:
-        model = Category
-        fields = ['name']
-
-class SeasonForm(forms.ModelForm):
-    class Meta:
-        model = Season
-        fields = ['name']    
-
 
 #using function method(Regular Form) for category/season form
 #Form Type: This is a regular form, not a ModelForm. It’s used for scenarios where you want to create or handle data that doesn't directly map to a Django model.
@@ -101,27 +108,3 @@ class DynamicGroupForm(forms.Form):
             return Season.objects.create(name=self.cleaned_data['name'])
         else:
             raise ValueError('Invalid group type')
-
-#Order form
-class OrderForm(forms.ModelForm):
-    class Meta:
-        model = Order
-        fields = ['product', 'quantity', 'delivery_address']
-
-        widgets = {
-            'product': forms.Select(attrs={'class': 'form-control'}),
-            'quantity': forms.NumberInput(attrs={'class': 'form-control', 'min': 1}),
-            'delivery_address': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
-        }
-
-    def clean_quantity(self):
-        quantity = self.cleaned_data.get('quantity')
-        if quantity <= 0:
-            raise forms.ValidationError("Quantity must be at least 1.")
-        return quantity
-    
-    def clean_delivery_address(self):
-        address = self.cleaned_data.get('delivery_address')
-        if not address.strip():
-            raise forms.ValidationError("Delivery address cannot be empty.")
-        return address

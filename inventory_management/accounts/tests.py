@@ -25,9 +25,6 @@ class AddSupplierEmailFallbackTests(TestCase):
                 'full_name': 'Test Supplier',
                 'address': '123 Supplier Street',
                 'email': 'supplier@example.com',
-                'username': 'supplier1',
-                'password': 'StrongPass123',
-                'confirm_password': 'StrongPass123',
             },
         )
 
@@ -67,7 +64,7 @@ class AdminOrderListFilteringTests(TestCase):
         self.category = Category.objects.create(name='Furniture')
         self.season = Season.objects.create(name='Spring')
         self.product = Product.objects.create(name='Office Lamp', category=self.category, season=self.season, price='45.00', quantity=20)
-        self.buyer = Buyer.objects.create(full_name='Alice Buyer', address='1 Main St', email='alice@example.com', username='alicebuyer', password='secret')
+        self.buyer = Buyer.objects.create(full_name='Alice Buyer', address='1 Main St', email='alice@example.com')
         self.order = Order.objects.create(buyer=self.buyer, product=self.product, quantity=2, delivery_address='123 Main St', status='pending')
 
     def test_admin_order_list_filters_by_status(self):
@@ -137,3 +134,36 @@ class GroupManagementTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Manage Category')
         self.assertContains(response, 'Furniture')
+
+
+class BuyerStorefrontTests(TestCase):
+    def setUp(self):
+        self.category = Category.objects.create(name='Shoes')
+        self.season = Season.objects.create(name='Summer')
+        self.product = Product.objects.create(name='Runner Shoes', category=self.category, season=self.season, price='120.00', quantity=10)
+
+    def test_buyer_home_page_shows_storefront_sections(self):
+        response = self.client.get(reverse('buyer_home'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Featured Products')
+        self.assertContains(response, 'Shop by Season')
+        self.assertContains(response, 'Runner Shoes')
+
+    def test_wishlist_page_shows_saved_products(self):
+        session = self.client.session
+        session['wishlist'] = [self.product.id]
+        session.save()
+
+        response = self.client.get(reverse('wishlist'))
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Wishlist')
+        self.assertContains(response, self.product.name)
+
+    def test_add_to_cart_stores_item_in_session(self):
+        response = self.client.get(reverse('add_to_cart', args=[self.product.id]))
+
+        self.assertEqual(response.status_code, 302)
+        self.assertIn(str(self.product.id), self.client.session['cart'])
+        self.assertEqual(self.client.session['cart'][str(self.product.id)]['quantity'], 1)

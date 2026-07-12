@@ -30,15 +30,27 @@ urlpatterns = [
 
 
     # User-specific paths
-    path('buyer/login/', views.login_view, name='login_view'),
+    path('buyer/login/', views.buyer_login_request, name='buyer_login_request'),
+    path('buyer/login/verify/', views.buyer_login_verify, name='buyer_login_verify'),
+    path('buyer/register/complete/', views.buyer_complete_profile, name='buyer_complete_profile'),
     path('buyer/home/', views.buyer_home, name='buyer_home'),
+    path('buyer/categories/', views.buyer_category_page, name='buyer_category'),
+    path('buyer/cart/', views.cart_view, name='cart'),
+    path('buyer/cart/add/<int:product_id>/', views.add_to_cart, name='add_to_cart'),
+    path('buyer/cart/decrease/<int:product_id>/', views.decrease_cart_quantity, name='decrease_cart_quantity'),
+    path('buyer/cart/remove/<int:product_id>/', views.remove_from_cart, name='remove_from_cart'),
+    path('buyer/wishlist/', views.wishlist_view, name='wishlist'),
+    path('buyer/wishlist/toggle/<int:product_id>/', views.toggle_wishlist, name='toggle_wishlist'),
     path('buyer/orders/', views.buyer_orders, name='buyer_orders'),
-    path('buyer/place_order/<int:product_id>/', views.place_order, name='place_order'),
+    path('buyer/checkout/', views.checkout_view, name='checkout'),
     path('<str:user_type>/product/<int:product_id>/', views.buyer_product_detail, name='buyer_product_detail'),
 
 
     #Supplier
+    path('supplier/login/', views.supplier_login_request, name='supplier_login_request'),
+    path('supplier/login/verify/', views.supplier_login_verify, name='supplier_login_verify'),
+    path('supplier/register/complete/', views.supplier_complete_profile, name='supplier_complete_profile'),
     path('supplier/home/', views.supplier_home, name='supplier_home'),
-    
+
 ]
 

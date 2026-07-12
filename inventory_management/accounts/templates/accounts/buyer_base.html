@@ -4,90 +4,291 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Inventory Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-    {% block extra_css %}{% endblock %}  <!-- Extra CSS block -->
+    {% block extra_css %}{% endblock %}
 
-    <!-- Internal CSS -->
     <style>
+        :root {
+            color-scheme: light;
+        }
+
+        * { box-sizing: border-box; }
+
         body {
             margin: 0;
-            font-family: 'Arial', sans-serif;
-            background: #f5f5f5;
+            font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
+            background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+            color: #0f172a;
         }
+
         .navbar {
-            background: #212529;
-            color: white;
-            padding: 10px 0;
+            background: rgba(255,255,255,0.94);
+            backdrop-filter: blur(16px);
+            color: #0f172a;
+            padding: 12px 0;
             position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
             width: 100%;
             z-index: 999;
+            border-bottom: 1px solid rgba(15,23,42,0.06);
+            box-shadow: 0 8px 24px rgba(15,23,42,0.04);
         }
+
         .navbar-container {
-            width: 100%;
+            max-width: 1320px;
+            margin: 0 auto;
             display: flex;
+            align-items: center;
             justify-content: space-between;
-            padding: 0 20px;
-            align-items: center;
+            gap: 16px;
+            padding: 0 24px;
         }
+
         .navbar-logo {
-            font-size: 24px;
-            color: white;
+            font-size: 20px;
+            color: #111827;
             text-decoration: none;
-            font-weight: bold;
+            font-weight: 800;
             display: flex;
             align-items: center;
+            gap: 10px;
         }
+
         .navbar-logo i {
-            margin-right: 10px;
-            font-size: 28px;
+            color: #2563eb;
+            font-size: 22px;
         }
-        .navbar-logo span {
-            color: #dc3545;
-        }
+
         .navbar-links {
             list-style: none;
             display: flex;
-            gap: 20px;
-            flex-grow: 1;
+            align-items: center;
+            gap: 6px;
+            flex: 1;
             justify-content: center;
+            margin: 0;
+            padding: 0;
         }
+
         .navbar-links li {
-            display: inline;
+            display: flex;
+            align-items: center;
         }
+
         .navbar-links a {
-            color: white;
+            color: #334155;
             text-decoration: none;
             padding: 8px 12px;
-            font-size: 16px;
-            border-radius: 4px;
-            transition: background 0.3s;
+            font-size: 14px;
+            border-radius: 999px;
+            transition: background 0.2s ease, color 0.2s ease;
         }
+
         .navbar-links a:hover {
-            background: #575757;
+            background: #f1f5f9;
+            color: #111827;
         }
-        .logout-btn-container {
-            margin-left: auto;
-            padding-right: 20px;
+
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        .logout-btn {
-            background: #dc3545;
-            color: white;
-            padding: 10px 15px;
-            font-size: 16px;
+
+        .icon-btn {
+            position: relative;
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #334155;
+            width: 42px;
+            height: 42px;
+            padding: 0;
+            border-radius: 999px;
             cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            box-sizing: border-box;
+            flex: 0 0 42px;
+        }
+
+        .icon-btn.primary {
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            color: white;
             border: none;
-            border-radius: 4px;
-            transition: background 0.3s;
-            margin-right: 10px;
         }
-        .logout-btn:hover {
-            background: #c82333;
+
+        .nav-badge {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #dc2626;
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            min-width: 16px;
+            height: 16px;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            line-height: 1;
         }
+
+        .nav-dropdown {
+            position: relative;
+        }
+
+        .nav-dropdown summary {
+            list-style: none;
+            cursor: pointer;
+            color: #334155;
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 999px;
+            transition: background 0.2s ease, color 0.2s ease;
+        }
+
+        .nav-dropdown summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .nav-dropdown summary:hover,
+        .nav-dropdown[open] summary {
+            background: #f1f5f9;
+            color: #111827;
+        }
+
+        .nav-dropdown-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 0;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 12px 30px rgba(15,23,42,0.12);
+            padding: 8px;
+            min-width: 180px;
+            max-height: 320px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            z-index: 1000;
+        }
+
+        .nav-dropdown-menu a {
+            padding: 8px 10px;
+            border-radius: 8px;
+            color: #334155;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .nav-dropdown-menu a:hover {
+            background: #f1f5f9;
+            color: #111827;
+        }
+
+        .nav-dropdown-empty {
+            display: block;
+            padding: 8px 10px;
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .navbar-toggle {
+            display: none;
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #334155;
+            width: 42px;
+            height: 42px;
+            border-radius: 999px;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .auth-btn {
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #334155;
+            height: 42px;
+            padding: 0 14px;
+            border-radius: 999px;
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 600;
+            white-space: nowrap;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-sizing: border-box;
+            cursor: pointer;
+        }
+
+        .auth-btn.primary {
+            background: linear-gradient(135deg, #2563eb, #4f46e5);
+            color: white;
+            border: none;
+        }
+
+        .account-menu {
+            position: relative;
+        }
+
+        .account-menu summary {
+            list-style: none;
+            cursor: pointer;
+        }
+
+        .account-menu summary::-webkit-details-marker {
+            display: none;
+        }
+
+        .account-dropdown {
+            position: absolute;
+            top: calc(100% + 8px);
+            right: 0;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 12px 30px rgba(15,23,42,0.12);
+            padding: 14px;
+            min-width: 220px;
+            z-index: 1000;
+        }
+
+        .account-dropdown p {
+            margin: 0 0 12px;
+            font-size: 14px;
+            color: #334155;
+        }
+
+        .account-dropdown .btn-logout {
+            width: 100%;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: none;
+            background: #ef4444;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
         .main-content {
-            padding: 20px;
-            margin-top: 60px;
+            max-width: 1320px;
+            margin: 0 auto;
+            padding: 90px 24px 24px;
         }
+
         .orders-table {
             background: white;
             width: 100%;
@@ -95,21 +296,274 @@
             padding: 20px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 10px;
         }
+
         table, th, td {
             border: 1px solid #ddd;
         }
+
         th, td {
             padding: 8px;
             text-align: center;
         }
+
         th {
             background: #212529;
             color: white;
+        }
+
+        @media (max-width: 900px) {
+            .navbar-container {
+                flex-wrap: wrap;
+            }
+
+            .navbar-toggle {
+                display: inline-flex;
+            }
+
+            .navbar-links {
+                display: none;
+                order: 3;
+                width: 100%;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 4px;
+                margin-top: 10px;
+            }
+
+            .navbar-links.open {
+                display: flex;
+            }
+
+            .nav-dropdown-menu {
+                position: static;
+                box-shadow: none;
+                border: none;
+                margin-left: 12px;
+                max-height: none;
+            }
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+        }
+
+        .modal-overlay.open {
+            display: flex;
+        }
+
+        .modal-box {
+            position: relative;
+            width: 360px;
+            max-width: 90vw;
+            background: white;
+            border-radius: 14px;
+            padding: 32px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 12px;
+            border: none;
+            background: none;
+            font-size: 22px;
+            line-height: 1;
+            color: #64748b;
+            cursor: pointer;
+        }
+
+        #authModalBody h2 {
+            margin: 0 0 8px;
+            text-align: center;
+            font-size: 22px;
+        }
+
+        #authModalBody .modal-subtitle {
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 20px;
+        }
+
+        #authModalBody label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 6px;
+        }
+
+        #authModalBody input,
+        #authModalBody textarea {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            font-family: inherit;
+            box-sizing: border-box;
+        }
+
+        #authModalBody button[type="submit"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: none;
+            border-radius: 5px;
+            background: #2563eb;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #authModalBody button[type="submit"]:hover {
+            background: #1d4ed8;
+        }
+
+        #authModalBody .link-btn {
+            display: block;
+            text-align: center;
+            margin-top: 14px;
+            color: #2563eb;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        #authModalBody .errorlist {
+            list-style: none;
+            padding: 0;
+            margin: -10px 0 12px;
+            color: #dc2626;
+            font-size: 13px;
+        }
+
+        /* Shared product card component (used on the storefront and product detail's related products) */
+        .product-card {
+            background: white;
+            border-radius: 18px;
+            padding: 16px;
+            box-shadow: 0 10px 25px rgba(15,23,42,0.06);
+            border: 1px solid #e2e8f0;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .product-card img {
+            width: 100%;
+            height: 180px;
+            object-fit: contain;
+            border-radius: 14px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+        }
+
+        .product-card h3 {
+            margin: 0;
+            font-size: 16px;
+        }
+
+        .product-link {
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #0f172a;
+            font-weight: 700;
+        }
+
+        .meta-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .pill {
+            display: inline-flex;
+            padding: 4px 8px;
+            border-radius: 999px;
+            font-size: 12px;
+            background: #eff6ff;
+            color: #1d4ed8;
+        }
+
+        .pill.soft {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .btn-cart {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 42px;
+            padding: 0 16px;
+            border-radius: 999px;
+            border: none;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 14px;
+            font-weight: 600;
+            background: #111827;
+            color: white;
+            box-sizing: border-box;
+        }
+
+        .btn-cart:disabled {
+            background: #16a34a;
+            color: white;
+            cursor: default;
+            opacity: 1;
+        }
+
+        /* Navbar-style wishlist button - mirrors .icon-btn's white circular look */
+        .btn-wishlist {
+            width: 42px;
+            height: 42px;
+            padding: 0;
+            flex: 0 0 42px;
+            border: 1px solid #e2e8f0;
+            background: white;
+            color: #334155;
+            border-radius: 999px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+        }
+
+        .btn-wishlist.active {
+            color: #e11d48;
+            background: #fff1f2;
+            border-color: #fecdd3;
+        }
+
+        .btn-wishlist:active {
+            transform: scale(1.15);
         }
     </style>
 </head>
@@ -118,19 +572,68 @@
         <nav class="navbar">
             <div class="navbar-container">
                 <a href="{% url 'buyer_home' %}" class="navbar-logo">
-                    <i class="fas fa-cart-plus"></i> Inventory <span>Management</span>
+                    <i class="fas fa-boxes-stacked"></i> Inventory<span>Hub</span>
                 </a>
-                <ul class="navbar-links">
+                <ul class="navbar-links" id="navbarLinks">
                     <li><a href="{% url 'buyer_home' %}">Home</a></li>
+                    <li class="nav-dropdown">
+                        <details>
+                            <summary>Categories</summary>
+                            <div class="nav-dropdown-menu">
+                                {% for category in nav_categories %}
+                                <a href="{% url 'buyer_category' %}?category_id={{ category.id }}">{{ category.name }}</a>
+                                {% empty %}
+                                <span class="nav-dropdown-empty">No categories yet</span>
+                                {% endfor %}
+                            </div>
+                        </details>
+                    </li>
+                    <li class="nav-dropdown">
+                        <details>
+                            <summary>Seasons</summary>
+                            <div class="nav-dropdown-menu">
+                                {% for season in nav_seasons %}
+                                <a href="{% url 'buyer_category' %}?season_id={{ season.id }}">{{ season.name }}</a>
+                                {% empty %}
+                                <span class="nav-dropdown-empty">No seasons yet</span>
+                                {% endfor %}
+                            </div>
+                        </details>
+                    </li>
+                    <li><a href="{% url 'buyer_home' %}#new-arrivals">New Arrivals</a></li>
                     <li><a href="{% url 'buyer_orders' %}">Your Orders</a></li>
                 </ul>
-                <div class="logout-btn-container">
-                    <form method="post" action="{% url 'logout' %}">
-                        {% csrf_token %}
-                        <button type="submit" class="logout-btn">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </button>
-                    </form>
+                <div class="navbar-actions">
+                    <a href="{% url 'wishlist' %}" class="icon-btn" id="navWishlistIcon">
+                        <i class="fas fa-heart"></i>
+                        {% if nav_wishlist_count %}<span class="nav-badge">{{ nav_wishlist_count }}</span>{% endif %}
+                    </a>
+                    <a href="{% url 'cart' %}" class="icon-btn" id="navCartIcon">
+                        <i class="fas fa-shopping-bag"></i>
+                        {% if nav_cart_count %}<span class="nav-badge">{{ nav_cart_count }}</span>{% endif %}
+                    </a>
+                    {% if current_buyer or current_supplier %}
+                    <details class="account-menu">
+                        <summary class="auth-btn primary"><i class="fas fa-user"></i> My Account</summary>
+                        <div class="account-dropdown">
+                            {% if current_buyer %}
+                            <p><strong>{{ current_buyer.full_name }}</strong><br>{{ current_buyer.email }}</p>
+                            {% elif current_supplier %}
+                            <p><strong>{{ current_supplier.full_name }}</strong><br>{{ current_supplier.email }}</p>
+                            {% endif %}
+                            <form method="post" action="{% url 'logout' %}">
+                                {% csrf_token %}
+                                <button type="submit" class="btn-logout">Logout</button>
+                            </form>
+                        </div>
+                    </details>
+                    {% else %}
+                    <a href="{% url 'buyer_login_request' %}" class="auth-btn" data-auth-trigger>Sign In</a>
+                    <a href="{% url 'supplier_login_request' %}" class="auth-btn" data-auth-trigger>Sign In as Supplier</a>
+                    {% endif %}
+                    <button type="button" class="navbar-toggle" id="navbarToggle" aria-label="Toggle menu">
+                        <i class="fas fa-bars"></i>
+                    </button>
                 </div>
             </div>
         </nav>
@@ -142,6 +645,181 @@
 
     {% include 'accounts/partials/messages.html' %}
 
-    {% block extra_scripts %}{% endblock %}  <!-- Extra scripts block -->
+    <div id="authModalOverlay" class="modal-overlay">
+        <div class="modal-box">
+            <button type="button" class="modal-close" id="authModalClose">&times;</button>
+            <div id="authModalBody"></div>
+        </div>
+    </div>
+
+    <script>
+    (function () {
+        var overlay = document.getElementById('authModalOverlay');
+        var body = document.getElementById('authModalBody');
+        var closeBtn = document.getElementById('authModalClose');
+        var currentActionUrl = null;
+
+        function openModal(url) {
+            overlay.classList.add('open');
+            loadStep(url, 'GET');
+        }
+
+        function closeModal() {
+            overlay.classList.remove('open');
+            body.innerHTML = '';
+            currentActionUrl = null;
+        }
+
+        function loadStep(url, method, formData) {
+            var opts = { method: method, headers: { 'X-Requested-With': 'XMLHttpRequest' } };
+            if (formData) {
+                opts.body = formData;
+            }
+            fetch(url, opts)
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.redirect) {
+                        window.location.href = data.redirect;
+                        return;
+                    }
+                    body.innerHTML = data.html;
+                    currentActionUrl = data.action_url;
+                    bindStep();
+                })
+                .catch(function () {
+                    closeModal();
+                });
+        }
+
+        function bindStep() {
+            var form = body.querySelector('[data-modal-form]');
+            if (form) {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    loadStep(currentActionUrl, 'POST', new FormData(form));
+                });
+            }
+            var triggers = body.querySelectorAll('[data-auth-trigger]');
+            triggers.forEach(function (el) {
+                el.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    loadStep(el.href, 'GET');
+                });
+            });
+        }
+
+        document.querySelectorAll('[data-auth-trigger]').forEach(function (el) {
+            el.addEventListener('click', function (e) {
+                e.preventDefault();
+                openModal(el.href);
+            });
+        });
+
+        closeBtn.addEventListener('click', closeModal);
+        overlay.addEventListener('click', function (e) {
+            if (e.target === overlay) closeModal();
+        });
+
+        // If we were bounced here because a buyer-only action needed login,
+        // pop the sign-in modal open automatically instead of stranding the user.
+        var params = new URLSearchParams(window.location.search);
+        var authRequired = params.get('auth_required');
+        if (authRequired === 'buyer' || authRequired === 'supplier') {
+            var loginUrls = {
+                buyer: "{% url 'buyer_login_request' %}",
+                supplier: "{% url 'supplier_login_request' %}"
+            };
+            openModal(loginUrls[authRequired]);
+
+            params.delete('auth_required');
+            var query = params.toString();
+            var cleanUrl = window.location.pathname + (query ? '?' + query : '') + window.location.hash;
+            window.history.replaceState({}, '', cleanUrl);
+        }
+    })();
+
+    // Update a navbar count badge in place, without a page reload, so it never
+    // goes stale after an ajax cart/wishlist action.
+    window.setNavBadge = function (iconId, count) {
+        var icon = document.getElementById(iconId);
+        if (!icon) return;
+        var badge = icon.querySelector('.nav-badge');
+        if (count > 0) {
+            if (!badge) {
+                badge = document.createElement('span');
+                badge.className = 'nav-badge';
+                icon.appendChild(badge);
+            }
+            badge.textContent = count;
+        } else if (badge) {
+            badge.remove();
+        }
+    };
+
+    (function () {
+        // Event delegation (not a one-time querySelectorAll) so buttons added later
+        // (e.g. by infinite scroll) work without any extra re-binding.
+        document.addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-add-to-cart]');
+            if (!btn) return;
+            var url = btn.getAttribute('data-add-to-cart');
+            var originalText = btn.dataset.originalText || btn.textContent;
+            btn.dataset.originalText = originalText;
+            btn.disabled = true;
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    if (data.success) {
+                        btn.textContent = 'Added to Cart';
+                        if (typeof data.cart_count === 'number') {
+                            window.setNavBadge('navCartIcon', data.cart_count);
+                        }
+                    } else {
+                        btn.disabled = false;
+                        btn.textContent = data.message;
+                        setTimeout(function () { btn.textContent = originalText; }, 2500);
+                    }
+                })
+                .catch(function () {
+                    btn.disabled = false;
+                });
+        });
+    })();
+
+    (function () {
+        document.addEventListener('click', function (e) {
+            var btn = e.target.closest('[data-toggle-wishlist]');
+            if (!btn) return;
+            var url = btn.getAttribute('data-toggle-wishlist');
+            btn.disabled = true;
+            fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                .then(function (r) { return r.json(); })
+                .then(function (data) {
+                    btn.disabled = false;
+                    if (data.success) {
+                        btn.classList.toggle('active', data.in_wishlist);
+                        btn.innerHTML = '<i class="' + (data.in_wishlist ? 'fas' : 'far') + ' fa-heart"></i>';
+                        if (typeof data.wishlist_count === 'number') {
+                            window.setNavBadge('navWishlistIcon', data.wishlist_count);
+                        }
+                    }
+                })
+                .catch(function () {
+                    btn.disabled = false;
+                });
+        });
+    })();
+
+    (function () {
+        var toggle = document.getElementById('navbarToggle');
+        var links = document.getElementById('navbarLinks');
+        if (!toggle || !links) return;
+        toggle.addEventListener('click', function () {
+            links.classList.toggle('open');
+        });
+    })();
+    </script>
+
+    {% block extra_scripts %}{% endblock %}
 </body>
 </html>

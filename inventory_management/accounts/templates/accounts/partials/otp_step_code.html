@@ -1,0 +1,9 @@
+<h2>Enter Code</h2>
+<p class="modal-subtitle">We sent a 6-digit code to <strong>{{ email }}</strong>. It expires shortly.</p>
+<form data-modal-form>
+    {% csrf_token %}
+    {{ form.code }}
+    {{ form.code.errors }}
+    <button type="submit">Verify</button>
+</form>
+<a href="{% url role|add:'_login_request' %}" data-auth-trigger class="link-btn">Use a different email / resend code</a>

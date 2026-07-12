@@ -8,9 +8,14 @@
             <h2>Manage {{ group_by|title }}</h2>
             <p>Create, edit, and remove {{ group_by }} entries from one place.</p>
         </div>
-        <a href="{% url 'add_group' group_by %}" class="add-btn">
-            <i class="fas fa-plus"></i> Add {{ group_by|title }}
-        </a>
+        <div style="display:flex; gap:10px;">
+            <a href="{% url 'grouped_product_list' group_by %}" class="add-btn" style="background:#0f766e;">
+                <i class="fas fa-box-open"></i> View Products
+            </a>
+            <a href="{% url 'add_group' group_by %}" class="add-btn">
+                <i class="fas fa-plus"></i> Add {{ group_by|title }}
+            </a>
+        </div>
     </div>
 
     <div class="table-card">

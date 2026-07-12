@@ -1,0 +1,12 @@
+<h2>Almost done</h2>
+<p class="modal-subtitle">Confirmed as <strong>{{ email }}</strong>. Tell us a bit about yourself as a {{ role_label }}.</p>
+<form data-modal-form>
+    {% csrf_token %}
+    <label for="{{ form.full_name.id_for_label }}">Full Name</label>
+    {{ form.full_name }}
+    {{ form.full_name.errors }}
+    <label for="{{ form.address.id_for_label }}">Address</label>
+    {{ form.address }}
+    {{ form.address.errors }}
+    <button type="submit">Create Account</button>
+</form>

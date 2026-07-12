@@ -1,0 +1,150 @@
+{% extends 'accounts/buyer_base.html' %}
+{% block title %}Cart{% endblock %}
+
+{% block extra_css %}
+<style>
+    .cart-shell { display: grid; gap: 16px; }
+    .card { background: white; border-radius: 20px; padding: 18px; box-shadow: 0 10px 25px rgba(15,23,42,0.06); border: 1px solid #e2e8f0; }
+    .items { display: grid; gap: 4px; }
+    .item { display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid #e5e7eb; }
+    .item:last-child { border-bottom: none; }
+    .item-media {
+        width: 76px; height: 76px; flex: 0 0 auto; border-radius: 12px; overflow: hidden;
+        background: #f8fafc; border: 1px solid #e2e8f0;
+    }
+    .item-media img { width: 100%; height: 100%; object-fit: contain; }
+    .item-info { flex: 1; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+    .item-info strong { font-size: 15px; }
+    .item-actions { text-align: right; display: flex; flex-direction: column; align-items: flex-end; gap: 8px; }
+    .item-price { font-weight: 700; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 14px; border-radius: 999px; text-decoration: none; font-weight: 700; border: none; cursor: pointer; font-family: inherit; font-size: 14px; }
+    .btn-primary { background: #111827; color: white; }
+    .btn-secondary { background: #f1f5f9; color: #0f172a; }
+    .qty-stepper { display: inline-flex; align-items: center; gap: 10px; }
+    .qty-btn {
+        width: 30px; height: 30px; border-radius: 999px; border: 1px solid #e2e8f0;
+        background: white; color: #0f172a; font-size: 16px; font-weight: 700;
+        display: inline-flex; align-items: center; justify-content: center;
+        cursor: pointer; line-height: 1; padding: 0;
+    }
+    .qty-btn:hover { background: #f1f5f9; }
+    .qty-btn:disabled { opacity: 0.5; cursor: default; }
+    .qty-value { min-width: 20px; text-align: center; font-weight: 700; }
+    .qty-note { display: none; color: #dc2626; font-size: 12px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cart-shell">
+    <div class="card">
+        <h2 style="margin-top:0;">Your Cart</h2>
+        <div id="cartEmpty" {% if cart_items %}style="display:none;"{% endif %}>
+            <p>Your cart is empty.</p>
+        </div>
+        <div id="cartContent" {% if not cart_items %}style="display:none;"{% endif %}>
+            <div class="items" id="cartItems">
+                {% for item in cart_items %}
+                <div class="item" data-product-id="{{ item.product.id }}">
+                    <div class="item-media">
+                        {% if item.product.picture and item.product.picture.name %}
+                        <img src="{{ item.product.picture.url }}" alt="{{ item.product.name }}">
+                        {% else %}
+                        <img src="/media/product_images/default-image.jpg" alt="{{ item.product.name }}">
+                        {% endif %}
+                    </div>
+                    <div class="item-info">
+                        <strong>{{ item.product.name }}</strong>
+                        <div class="qty-stepper">
+                            <form method="post" action="{% url 'decrease_cart_quantity' item.product.id %}" data-cart-action="decrease">
+                                {% csrf_token %}
+                                <button type="submit" class="qty-btn" aria-label="Decrease quantity">&minus;</button>
+                            </form>
+                            <span class="qty-value">{{ item.quantity }}</span>
+                            <form method="post" action="{% url 'add_to_cart' item.product.id %}" data-cart-action="increase">
+                                {% csrf_token %}
+                                <button type="submit" class="qty-btn" aria-label="Increase quantity">&plus;</button>
+                            </form>
+                        </div>
+                        <span class="qty-note"></span>
+                    </div>
+                    <div class="item-actions">
+                        <div class="item-price">${{ item.line_total }}</div>
+                        <form method="post" action="{% url 'remove_from_cart' item.product.id %}" data-cart-action="remove">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-secondary">Remove</button>
+                        </form>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
+                <strong>Total: $<span id="cartTotal">{{ total }}</span></strong>
+                <a class="btn btn-primary" href="{% url 'checkout' %}">Checkout</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+(function () {
+    var itemsContainer = document.getElementById('cartItems');
+    var cartContent = document.getElementById('cartContent');
+    var cartEmpty = document.getElementById('cartEmpty');
+    var cartTotalEl = document.getElementById('cartTotal');
+    if (!itemsContainer) return;
+
+    itemsContainer.addEventListener('submit', function (e) {
+        var form = e.target.closest('form[data-cart-action]');
+        if (!form) return;
+        e.preventDefault();
+
+        var row = form.closest('.item');
+        var submitBtn = form.querySelector('button[type="submit"]');
+        var note = row.querySelector('.qty-note');
+        if (submitBtn) submitBtn.disabled = true;
+
+        fetch(form.action, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: new FormData(form)
+        })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (!data.success) {
+                    if (submitBtn) submitBtn.disabled = false;
+                    if (note && data.message) {
+                        note.textContent = data.message;
+                        note.style.display = 'block';
+                        setTimeout(function () { note.style.display = 'none'; }, 2500);
+                    }
+                    return;
+                }
+
+                if (typeof data.cart_count === 'number' && window.setNavBadge) {
+                    window.setNavBadge('navCartIcon', data.cart_count);
+                }
+                if (cartTotalEl && typeof data.cart_total !== 'undefined') {
+                    cartTotalEl.textContent = data.cart_total;
+                }
+
+                if (data.removed) {
+                    row.remove();
+                    if (!itemsContainer.querySelector('.item')) {
+                        cartContent.style.display = 'none';
+                        cartEmpty.style.display = '';
+                    }
+                } else {
+                    row.querySelector('.qty-value').textContent = data.quantity;
+                    row.querySelector('.item-price').textContent = '$' + data.line_total;
+                    if (submitBtn) submitBtn.disabled = false;
+                }
+            })
+            .catch(function () {
+                if (submitBtn) submitBtn.disabled = false;
+            });
+    });
+})();
+</script>
+{% endblock %}

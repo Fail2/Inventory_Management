@@ -2,38 +2,141 @@
 
 {% block title %}Product Details{% endblock %}
 
+{% block extra_css %}
+<style>
+    .detail-shell { display: grid; grid-template-columns: 1.1fr 0.9fr; gap: 24px; }
+    .media-card, .info-card, .card { background: white; border-radius: 22px; padding: 20px; box-shadow: 0 12px 30px rgba(15,23,42,0.08); border: 1px solid #e2e8f0; }
+    .media-card img { width: 100%; height: 420px; object-fit: contain; border-radius: 16px; background: #f8fafc; }
+    .info-card h1 { margin: 0 0 8px; font-size: 28px; }
+    .price { font-size: 28px; font-weight: 800; color: #111827; margin: 10px 0; }
+    .purchase-row { display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap; }
+    .qty-box {
+        display: inline-flex; align-items: center; gap: 14px; padding: 0 6px;
+        border: 1px solid #cbd5e1; border-radius: 999px; background: white; height: 46px;
+    }
+    .qty-btn {
+        width: 30px; height: 30px; border-radius: 999px; border: 1px solid #e2e8f0;
+        background: white; color: #0f172a; font-size: 16px; font-weight: 700;
+        display: inline-flex; align-items: center; justify-content: center;
+        cursor: pointer; line-height: 1; padding: 0;
+    }
+    .qty-btn:hover { background: #f1f5f9; }
+    .qty-btn:disabled { opacity: 0.4; cursor: default; }
+    .qty-value { min-width: 20px; text-align: center; font-weight: 700; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; height: 46px; padding: 0 20px; border-radius: 999px; text-decoration: none; border: none; cursor: pointer; font-weight: 700; font-family: inherit; font-size: 14px; box-sizing: border-box; }
+    .btn-primary { background: #111827; color: white; flex: 1; }
+    .btn-primary:disabled { background: #16a34a; color: white; cursor: default; opacity: 1; }
+    .btn-secondary { background: #f1f5f9; color: #0f172a; }
+    .related-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 260px)); justify-content: start; gap: 16px; margin-top: 20px; }
+    @media (max-width: 960px) { .detail-shell { grid-template-columns: 1fr; } }
+</style>
+{% endblock %}
+
 {% block content %}
-<div style="text-align: center;">
-    <h2>{{ product.name }}</h2>
-    <img src="{{ product.picture.url|default:'/media/product_images/default-image.jpg' }}" alt="{{ product.name }}" style="max-width: 300px;">
-    <p>Price: ${{ product.price }}</p>
-    <p>Available Quantity: {{ product.quantity }}</p>
-    <p>Category: {{ product.category }}</p>
-    <p>Season: {{ product.season }}</p>
+<div class="detail-shell">
+    <div class="media-card">
+        {% if product.picture and product.picture.name %}
+        <img src="{{ product.picture.url }}" alt="{{ product.name }}">
+        {% else %}
+        <img src="/media/product_images/default-image.jpg" alt="{{ product.name }}">
+        {% endif %}
+    </div>
+    <div class="info-card">
+        <div class="meta-row">
+            <span class="pill">{{ product.category.name|default:'General' }}</span>
+            <span class="pill soft">{{ product.season.name|default:'All Season' }}</span>
+        </div>
+        <h1>{{ product.name }}</h1>
+        <p class="muted">Premium quality with elegant design and dependable comfort.</p>
+        <div class="price">${{ product.price }}</div>
+        <p><strong>Stock:</strong> {{ product.quantity }}</p>
+        <p><strong>Description:</strong> {{ product.name }} is a carefully curated product for modern living.</p>
 
-    {% if product.quantity > 0 %}
-    <form method="post" style="margin-top: 20px;">
-        {% csrf_token %}
-        <label for="quantity">Order Quantity:</label>
-        <input type="number" name="quantity" min="1" max="{{ product.quantity }}" required>
-
-        <br><br>
-        <label for="delivery_address">Delivery Address:</label>
-        <textarea name="delivery_address" required></textarea>
-
-        <br><br>
-        <button type="submit">Place Order</button>
-    </form>
-    {% else %}
-    <p style="color: red;">Out of Stock</p>
-    {% endif %}
-
-    {% if messages %}
-        <ul>
-            {% for message in messages %}
-                <li {% if message.tags %} class="{{ message.tags }}" {% endif %}>{{ message }}</li>
-            {% endfor %}
-        </ul>
-    {% endif %}
+        {% if product.quantity > 0 %}
+        <div class="purchase-row">
+            <div class="qty-box">
+                <button type="button" class="qty-btn" id="qtyMinus" aria-label="Decrease quantity">&minus;</button>
+                <span class="qty-value" id="qtyValue">1</span>
+                <button type="button" class="qty-btn" id="qtyPlus" aria-label="Increase quantity">&plus;</button>
+            </div>
+            <button type="button" class="btn btn-primary" id="addToCartBtn"
+                    data-add-to-cart-url="{% url 'add_to_cart' product.id %}" data-max="{{ product.quantity }}">
+                Add to Cart
+            </button>
+        </div>
+        {% else %}
+        <p style="color: #dc2626; font-weight: 700;">Out of Stock</p>
+        {% endif %}
+    </div>
 </div>
+
+{% if related_products or seasonal_products %}
+<div style="margin-top: 28px;">
+    <div class="section-title" style="margin-bottom: 10px;">
+        <h2>Related Products</h2>
+    </div>
+    <div class="related-grid">
+        {% for related in related_products %}
+        {% include 'accounts/partials/product_card.html' with product=related %}
+        {% endfor %}
+        {% for related in seasonal_products %}
+        {% include 'accounts/partials/product_card.html' with product=related %}
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_scripts %}
+{% if product.quantity > 0 %}
+<script>
+(function () {
+    var qtyValue = document.getElementById('qtyValue');
+    var minusBtn = document.getElementById('qtyMinus');
+    var plusBtn = document.getElementById('qtyPlus');
+    var addBtn = document.getElementById('addToCartBtn');
+    var addUrl = addBtn.getAttribute('data-add-to-cart-url');
+    var max = parseInt(addBtn.getAttribute('data-max'), 10) || 1;
+    var qty = 1;
+
+    function render() {
+        qtyValue.textContent = qty;
+        minusBtn.disabled = qty <= 1;
+        plusBtn.disabled = qty >= max;
+    }
+
+    minusBtn.addEventListener('click', function () {
+        if (qty > 1) { qty -= 1; render(); }
+    });
+    plusBtn.addEventListener('click', function () {
+        if (qty < max) { qty += 1; render(); }
+    });
+
+    addBtn.addEventListener('click', function () {
+        var url = addUrl + '?quantity=' + qty;
+        var originalText = addBtn.textContent;
+        addBtn.disabled = true;
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+            .then(function (r) { return r.json(); })
+            .then(function (data) {
+                if (data.success) {
+                    addBtn.textContent = 'Added to Cart';
+                    if (typeof data.cart_count === 'number' && window.setNavBadge) {
+                        window.setNavBadge('navCartIcon', data.cart_count);
+                    }
+                } else {
+                    addBtn.disabled = false;
+                    addBtn.textContent = data.message;
+                    setTimeout(function () { addBtn.textContent = originalText; }, 2500);
+                }
+            })
+            .catch(function () {
+                addBtn.disabled = false;
+            });
+    });
+
+    render();
+})();
+</script>
+{% endif %}
 {% endblock %}

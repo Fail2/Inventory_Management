@@ -2,8 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Login</title>
-
+    <title>{{ role_label }} Login</title>
     <style>
         body {
             background: #f2f2f2;
@@ -36,57 +35,61 @@
             font-size: 14px;
         }
 
-        a.btn {
-            display: block;
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+
+        input, button {
             width: 100%;
             padding: 12px 15px;
             margin-bottom: 15px;
+            border: 1px solid #ccc;
             border-radius: 5px;
+            outline: none;
             font-size: 16px;
-            font-weight: bold;
-            text-decoration: none;
-            text-align: center;
             box-sizing: border-box;
+            transition: border 0.3s;
+        }
+
+        input:focus {
+            border-color: #007bff;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
             transition: background-color 0.3s;
         }
 
-        a.btn-primary {
-            background-color: #007bff;
-            color: white;
-        }
-
-        a.btn-primary:hover {
+        button:hover {
             background-color: #0056b3;
         }
 
-        a.btn-secondary {
-            background-color: #f1f5f9;
-            color: #0f172a;
-        }
-
-        a.btn-secondary:hover {
-            background-color: #e2e8f0;
-        }
-
-        p.admin-link {
-            margin-top: 4px;
-            text-align: center;
-            font-size: 14px;
-        }
+        .errorlist { color: #dc2626; font-size: 13px; margin: -10px 0 10px; padding-left: 18px; }
     </style>
 </head>
 <body>
 
     <div class="login-container">
-        <h2>Welcome</h2>
-        <p class="subtitle">Continue as a buyer or a supplier — we'll email you a one-time code, no password needed.</p>
+        <h2>Welcome, {{ role_label }}</h2>
+        <p class="subtitle">Enter your email — we'll send you a one-time code to log in or sign up.</p>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.email }}
+            {{ form.email.errors }}
+            <button type="submit">Send Code</button>
 
-        <a class="btn btn-primary" href="{% url 'buyer_login_request' %}">Continue as Buyer</a>
-        <a class="btn btn-secondary" href="{% url 'supplier_login_request' %}">Continue as Supplier</a>
-
-        <p class="admin-link">
-            <a href="{% url 'admin-login' %}">Login as Admin</a>
-        </p>
+            <p style="margin-top:10px; text-align: center;">
+                <a href="{% url alt_role|add:'_login_request' %}">Login as {{ alt_role|title }}</a>
+            </p>
+            <p style="margin-top:4px; text-align: center;">
+                <a href="{% url 'admin-login' %}">Login as Admin</a>
+            </p>
+        </form>
     </div>
 
 </body>
