@@ -36,4 +36,4 @@ databases:
   - name: inventory-management-db
     postgresMajorVersion: "15"
     region: oregon
-    plan: starter
+    plan: free
