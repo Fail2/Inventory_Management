@@ -58,6 +58,11 @@ CSRF_FAILURE_VIEW = 'accounts.views.csrf_failure'
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 SECURE_SSL_REDIRECT = not DEBUG
+# Render's internal health check hits the app directly over plain HTTP,
+# bypassing the HTTPS-terminating edge proxy - without this exemption,
+# SECURE_SSL_REDIRECT would 301 that request and the health check would
+# never see a 200, permanently failing every deploy.
+SECURE_REDIRECT_EXEMPT = [r'^healthz/$']
 SESSION_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SECURE = not DEBUG
 SECURE_HSTS_SECONDS = 31536000

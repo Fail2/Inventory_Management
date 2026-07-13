@@ -27,7 +27,7 @@ services:
           name: inventory-management-db
           property: connectionString
     autoDeploy: true
-    healthCheckPath: "/"
+    healthCheckPath: "/healthz/"
 
 # Managed PostgreSQL database - DATABASE_URL is wired into the web service
 # above via fromDatabase, so schema changes actually land on Postgres
