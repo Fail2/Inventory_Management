@@ -202,6 +202,14 @@ if CLOUDINARY_CLOUD_NAME:
         },
     }
 
+# django-cloudinary-storage's collectstatic override reads this legacy,
+# pre-Django-4.2 setting directly (not the STORAGES dict above), and raises
+# AttributeError if it's unset - which it always is here, since STORAGES is
+# the only thing we define. Needed in every environment because the
+# 'cloudinary_storage' app (and its collectstatic override) is always
+# installed, regardless of whether Cloudinary credentials are present.
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
