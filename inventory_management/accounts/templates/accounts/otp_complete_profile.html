@@ -4,9 +4,13 @@
     <meta charset="UTF-8">
     <title>Complete Your Profile</title>
     <style>
+        :root {
+            {% include 'accounts/partials/design_tokens.html' %}
+        }
+
         body {
             background: #f2f2f2;
-            font-family: 'Poppins', sans-serif;
+            font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
             display: flex;
             height: 100vh;
             justify-content: center;
@@ -17,7 +21,7 @@
         .login-container {
             background: #ffffff;
             padding: 40px 30px;
-            border-radius: 10px;
+            border-radius: var(--radius-md);
             box-shadow: 0px 0px 15px rgba(0, 0, 0, 0.1);
             width: 380px;
             max-width: 90vw;
@@ -53,7 +57,7 @@
             padding: 12px 15px;
             margin-bottom: 15px;
             border: 1px solid #ccc;
-            border-radius: 5px;
+            border-radius: var(--radius-sm);
             outline: none;
             font-size: 16px;
             box-sizing: border-box;
@@ -62,11 +66,11 @@
         }
 
         input:focus, textarea:focus {
-            border-color: #007bff;
+            border-color: var(--accent);
         }
 
         button {
-            background-color: #007bff;
+            background-color: var(--accent);
             color: white;
             font-weight: bold;
             border: none;
@@ -78,7 +82,7 @@
             background-color: #0056b3;
         }
 
-        .errorlist { color: #dc2626; font-size: 13px; margin: -10px 0 10px; padding-left: 18px; }
+        .errorlist { color: var(--danger); font-size: 13px; margin: -10px 0 10px; padding-left: 18px; }
     </style>
 </head>
 <body>

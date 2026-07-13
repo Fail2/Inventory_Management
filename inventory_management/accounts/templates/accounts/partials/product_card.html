@@ -9,7 +9,7 @@
         </div>
         <h3>{{ product.name }}</h3>
         <div class="price-row">
-            <span class="price">${{ product.price }}</span>
+            <span class="price">Tk {{ product.price }}</span>
             {% if product.quantity <= 5 %}
             <span class="stock-low">Only {{ product.quantity }} left</span>
             {% else %}
@@ -19,9 +19,9 @@
     </a>
     <div class="product-card-actions">
         {% if product.id|stringformat:"s" in cart_product_ids %}
-        <button type="button" class="btn-cart" disabled>Added to Cart</button>
+        <a href="{% url 'cart' %}" class="btn-cart btn-view-cart">View Cart</a>
         {% else %}
-        <button type="button" class="btn-cart" data-add-to-cart="{% url 'add_to_cart' product.id %}">Add to Cart</button>
+        <button type="button" class="btn-cart" data-add-to-cart="{% url 'add_to_cart' product.id %}" data-cart-url="{% url 'cart' %}">Add to Cart</button>
         {% endif %}
         {% if product.id|stringformat:"s" in wishlist_ids %}
         <button type="button" class="btn-wishlist active" data-toggle-wishlist="{% url 'toggle_wishlist' product.id %}"><i class="fas fa-heart"></i></button>

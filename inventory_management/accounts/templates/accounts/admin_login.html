@@ -6,6 +6,8 @@
     <title>Admin Login</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
+        :root { {% include 'accounts/partials/design_tokens.html' %} }
+
         * { box-sizing: border-box; }
 
         body {
@@ -15,7 +17,7 @@
             align-items: center;
             justify-content: center;
             font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
-            background: linear-gradient(135deg, #111827 0%, #1f2937 60%, #2563eb 140%);
+            background: linear-gradient(135deg, #111827 0%, #1f2937 60%, var(--accent) 140%);
             padding: 20px;
         }
 
@@ -23,7 +25,7 @@
             width: 100%;
             max-width: 380px;
             background: white;
-            border-radius: 18px;
+            border-radius: var(--radius-lg);
             box-shadow: 0 25px 60px rgba(15, 23, 42, 0.35);
             padding: 32px 30px;
         }
@@ -39,8 +41,8 @@
         .brand-icon {
             width: 52px;
             height: 52px;
-            border-radius: 14px;
-            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, var(--accent), var(--purple));
             display: flex;
             align-items: center;
             justify-content: center;
@@ -52,12 +54,12 @@
         .brand-title {
             font-size: 18px;
             font-weight: 700;
-            color: #0f172a;
+            color: var(--text);
         }
 
         .brand-subtitle {
             font-size: 13px;
-            color: #64748b;
+            color: var(--text-muted);
         }
 
         .field-group {
@@ -76,14 +78,14 @@
         .field-group input {
             padding: 11px 14px;
             border: 1px solid #d1d5db;
-            border-radius: 10px;
+            border-radius: var(--radius-md);
             font-size: 14px;
             font-family: inherit;
         }
 
         .field-group input:focus {
             outline: none;
-            border-color: #2563eb;
+            border-color: var(--accent);
             box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
         }
 
@@ -91,8 +93,8 @@
             width: 100%;
             padding: 12px;
             border: none;
-            border-radius: 10px;
-            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            border-radius: var(--radius-md);
+            background: linear-gradient(135deg, var(--accent), var(--purple));
             color: white;
             font-size: 15px;
             font-weight: 700;
@@ -110,12 +112,12 @@
             text-align: center;
             margin-top: 18px;
             font-size: 13px;
-            color: #64748b;
+            color: var(--text-muted);
             text-decoration: none;
         }
 
         .alt-link:hover {
-            color: #2563eb;
+            color: var(--accent);
         }
     </style>
 </head>

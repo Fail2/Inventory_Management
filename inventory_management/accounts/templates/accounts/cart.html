@@ -4,13 +4,13 @@
 {% block extra_css %}
 <style>
     .cart-shell { display: grid; gap: 16px; }
-    .card { background: white; border-radius: 20px; padding: 18px; box-shadow: 0 10px 25px rgba(15,23,42,0.06); border: 1px solid #e2e8f0; }
+    .card { background: white; border-radius: 20px; padding: 18px; box-shadow: 0 10px 25px rgba(15,23,42,0.06); border: 1px solid var(--border); }
     .items { display: grid; gap: 4px; }
     .item { display: flex; align-items: center; gap: 16px; padding: 16px 0; border-bottom: 1px solid #e5e7eb; }
     .item:last-child { border-bottom: none; }
     .item-media {
         width: 76px; height: 76px; flex: 0 0 auto; border-radius: 12px; overflow: hidden;
-        background: #f8fafc; border: 1px solid #e2e8f0;
+        background: #f8fafc; border: 1px solid var(--border);
     }
     .item-media img { width: 100%; height: 100%; object-fit: contain; transition: transform 0.3s ease; }
     .item-media:hover img { transform: scale(1.08); }
@@ -20,18 +20,18 @@
     .item-price { font-weight: 700; }
     .btn { display: inline-flex; align-items: center; justify-content: center; padding: 10px 14px; border-radius: 999px; text-decoration: none; font-weight: 700; border: none; cursor: pointer; font-family: inherit; font-size: 14px; }
     .btn-primary { background: #111827; color: white; }
-    .btn-secondary { background: #f1f5f9; color: #0f172a; }
+    .btn-secondary { background: #f1f5f9; color: var(--text); }
     .qty-stepper { display: inline-flex; align-items: center; gap: 10px; }
     .qty-btn {
-        width: 30px; height: 30px; border-radius: 999px; border: 1px solid #e2e8f0;
-        background: white; color: #0f172a; font-size: 16px; font-weight: 700;
+        width: 30px; height: 30px; border-radius: 999px; border: 1px solid var(--border);
+        background: white; color: var(--text); font-size: 16px; font-weight: 700;
         display: inline-flex; align-items: center; justify-content: center;
         cursor: pointer; line-height: 1; padding: 0;
     }
     .qty-btn:hover { background: #f1f5f9; }
     .qty-btn:disabled { opacity: 0.5; cursor: default; }
     .qty-value { min-width: 20px; text-align: center; font-weight: 700; }
-    .qty-note { display: none; color: #dc2626; font-size: 12px; }
+    .qty-note { display: none; color: var(--danger); font-size: 12px; }
 
     @media (max-width: 560px) {
         .item { flex-wrap: wrap; }
@@ -82,7 +82,7 @@
                         <span class="qty-note"></span>
                     </div>
                     <div class="item-actions">
-                        <div class="item-price">${{ item.line_total }}</div>
+                        <div class="item-price">Tk {{ item.line_total }}</div>
                         <form method="post" action="{% url 'remove_from_cart' item.product.id %}" data-cart-action="remove">
                             {% csrf_token %}
                             <button type="submit" class="btn btn-secondary">Remove</button>
@@ -92,7 +92,7 @@
                 {% endfor %}
             </div>
             <div style="margin-top: 14px; display: flex; justify-content: space-between; align-items: center;">
-                <strong>Total: $<span id="cartTotal">{{ total }}</span></strong>
+                <strong>Total: Tk <span id="cartTotal">{{ total }}</span></strong>
                 <a class="btn btn-primary" href="{% url 'checkout' %}">Checkout</a>
             </div>
         </div>
@@ -151,7 +151,7 @@
                     }
                 } else {
                     row.querySelector('.qty-value').textContent = data.quantity;
-                    row.querySelector('.item-price').textContent = '$' + data.line_total;
+                    row.querySelector('.item-price').textContent = 'Tk ' + data.line_total;
                     if (submitBtn) submitBtn.disabled = false;
                 }
             })

@@ -13,26 +13,7 @@
 
     <style>
         :root {
-            color-scheme: light;
-            --accent: #2563eb;
-            --accent-dark: #1d4ed8;
-            --accent-soft: #dbeafe;
-            --accent-gradient: linear-gradient(135deg, #2563eb, #7c3aed);
-            --danger: #dc2626;
-            --danger-soft: #fee2e2;
-            --success: #16a34a;
-            --success-soft: #dcfce7;
-            --warning: #b45309;
-            --warning-soft: #fef3c7;
-            --purple: #7c3aed;
-            --purple-soft: #ede9fe;
-            --text: #0f172a;
-            --text-muted: #64748b;
-            --border: #e2e8f0;
-            --card-shadow: 0 10px 25px rgba(15, 23, 42, 0.06);
-            --radius-lg: 14px;
-            --radius-md: 10px;
-            --radius-sm: 8px;
+            {% include 'accounts/partials/design_tokens.html' %}
         }
 
         * {
@@ -43,7 +24,7 @@
             margin: 0;
             font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
             background: linear-gradient(135deg, #f4f7fb 0%, #eef2f7 100%);
-            color: #0f172a;
+            color: var(--text);
             min-height: 100vh;
             display: flex;
             line-height: 1.5;
@@ -73,7 +54,7 @@
             width: 42px;
             height: 42px;
             border-radius: 12px;
-            background: linear-gradient(135deg, #2563eb, #7c3aed);
+            background: var(--accent-gradient);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -96,7 +77,7 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            color: #e2e8f0;
+            color: var(--border);
             padding: 11px 12px;
             text-decoration: none;
             font-size: 14px;
@@ -119,7 +100,7 @@
         .logout-btn {
             width: 100%;
             border: none;
-            background: linear-gradient(135deg, #dc2626, #b91c1c);
+            background: linear-gradient(135deg, var(--danger), #b91c1c);
             color: white;
             padding: 11px 12px;
             font-size: 14px;
@@ -251,8 +232,8 @@
         }
 
         .btn-secondary {
-            background: #e2e8f0;
-            color: #0f172a;
+            background: var(--border);
+            color: var(--text);
         }
 
         .btn-danger {

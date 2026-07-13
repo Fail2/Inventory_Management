@@ -16,7 +16,7 @@
     }
 
     .hero h1 { font-size: 34px; margin: 0 0 10px; }
-    .hero p { color: #e2e8f0; margin-bottom: 16px; max-width: 560px; }
+    .hero p { color: var(--border); margin-bottom: 16px; max-width: 560px; }
     .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; }
     .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; height: 42px; padding: 0 16px; border-radius: 999px; text-decoration: none; font-weight: 600; border: none; cursor: pointer; font-family: inherit; font-size: 14px; box-sizing: border-box; }
     .btn-primary { background: white; color: #111827; }
@@ -32,11 +32,11 @@
 
     .section-title { display: flex; justify-content: space-between; align-items: center; margin: 24px 0 12px; }
     .section-title h2 { margin: 0; font-size: 20px; }
-    .section-title a { color: #2563eb; text-decoration: none; font-weight: 600; }
+    .section-title a { color: var(--accent); text-decoration: none; font-weight: 600; }
 
-    .card { background: white; border-radius: 18px; padding: 16px; box-shadow: 0 10px 25px rgba(15,23,42,0.06); border: 1px solid #e2e8f0; }
+    .card { background: white; border-radius: 18px; padding: 16px; box-shadow: 0 10px 25px rgba(15,23,42,0.06); border: 1px solid var(--border); }
 
-    .muted { color: #64748b; font-size: 13px; }
+    .muted { color: var(--text-muted); font-size: 13px; }
 
     @media (max-width: 900px) {
         .hero { grid-template-columns: 1fr; }
@@ -47,7 +47,7 @@
         border-radius: 20px;
         overflow: hidden;
         background: #f8fafc;
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--border);
         height: 380px;
     }
 
@@ -181,7 +181,7 @@
             {% endif %}
             <div class="arrivals-caption">
                 <span>{{ product.name }}</span>
-                <span>${{ product.price }}</span>
+                <span>Tk {{ product.price }}</span>
             </div>
         </a>
         {% endfor %}

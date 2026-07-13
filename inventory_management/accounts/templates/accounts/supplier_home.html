@@ -10,9 +10,13 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     
     <style>
+        :root {
+            {% include 'accounts/partials/design_tokens.html' %}
+        }
+
         /* General styling for the Supplier Dashboard */
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Inter', 'Segoe UI', Roboto, Arial, sans-serif;
             margin: 0;
             padding: 0;
             background: #f5f5f5;
@@ -21,7 +25,7 @@
         .supplier-home {
             padding: 20px;
             background: #f5f5f5;
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
         }
 
         .supplier-topbar {
@@ -66,7 +70,7 @@
             top: calc(100% + 8px);
             right: 0;
             background: white;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border);
             border-radius: 12px;
             box-shadow: 0 12px 30px rgba(15,23,42,0.12);
             padding: 14px;
@@ -104,7 +108,7 @@
         }
 
         .account-dropdown .btn-my-info:hover {
-            background: #e2e8f0;
+            background: var(--border);
         }
 
         .logout-btn {
@@ -119,7 +123,7 @@
         .account-info-panel {
             margin-top: 12px;
             padding-top: 12px;
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid var(--border);
         }
 
         .account-info-panel label {
@@ -136,7 +140,7 @@
             padding: 8px 10px;
             margin-bottom: 10px;
             border: 1px solid #cbd5e1;
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
             font-size: 13px;
             font-family: inherit;
             box-sizing: border-box;
@@ -144,7 +148,7 @@
 
         .account-info-panel input:disabled {
             background: #f1f5f9;
-            color: #64748b;
+            color: var(--text-muted);
         }
 
         .account-info-panel button {
@@ -160,14 +164,14 @@
         }
 
         .account-info-panel .errorlist {
-            color: #dc2626;
+            color: var(--danger);
             font-size: 12px;
             margin: -6px 0 8px;
             padding-left: 14px;
         }
 
         .account-info-success {
-            color: #16a34a;
+            color: var(--success);
             font-size: 13px;
             font-weight: 600;
             text-align: center;
@@ -188,7 +192,7 @@
             background: white;
             border: 1px solid #e5e7eb;
             border-left: 4px solid #cbd5e1;
-            border-radius: 14px;
+            border-radius: var(--radius-lg);
             box-shadow: 0 4px 14px rgba(15,23,42,0.05);
             overflow: hidden;
             transition: box-shadow 0.15s ease, transform 0.15s ease;
@@ -200,9 +204,9 @@
         }
 
         .supplier-order-card.status-pending { border-left-color: #f59e0b; }
-        .supplier-order-card.status-approved { border-left-color: #2563eb; }
-        .supplier-order-card.status-shipped { border-left-color: #7c3aed; }
-        .supplier-order-card.status-delivered { border-left-color: #16a34a; }
+        .supplier-order-card.status-approved { border-left-color: var(--accent); }
+        .supplier-order-card.status-shipped { border-left-color: var(--purple); }
+        .supplier-order-card.status-delivered { border-left-color: var(--success); }
 
         .supplier-order-topline {
             display: flex;
@@ -232,10 +236,10 @@
         }
 
         .badge i { font-size: 6px; }
-        .badge-pending { background: #fef3c7; color: #92400e; }
-        .badge-approved { background: #dbeafe; color: #1e40af; }
-        .badge-shipped { background: #ede9fe; color: #5b21b6; }
-        .badge-delivered { background: #dcfce7; color: #166534; }
+        .badge-pending { background: var(--warning-soft); color: #92400e; }
+        .badge-approved { background: var(--accent-soft); color: #1e40af; }
+        .badge-shipped { background: var(--purple-soft); color: #5b21b6; }
+        .badge-delivered { background: var(--success-soft); color: #166534; }
 
         .supplier-order-content {
             display: flex;
@@ -250,7 +254,7 @@
             gap: 12px;
             padding: 14px;
             background: #f8fafc;
-            border-radius: 10px;
+            border-radius: var(--radius-md);
         }
 
         .info-cell {
@@ -288,7 +292,7 @@
             align-items: center;
             padding: 12px 14px;
             background: #111827;
-            border-radius: 10px;
+            border-radius: var(--radius-md);
             color: white;
             font-size: 14px;
         }
@@ -300,7 +304,7 @@
 
         .muted-note {
             font-size: 13px;
-            color: #64748b;
+            color: var(--text-muted);
             font-style: italic;
             display: flex;
             align-items: center;
@@ -309,7 +313,7 @@
         }
 
         .delivered-note {
-            color: #16a34a;
+            color: var(--success);
             font-style: normal;
             font-weight: 600;
         }
@@ -317,19 +321,19 @@
         .empty-state {
             padding: 20px;
             border: 1px dashed #cbd5e1;
-            border-radius: 10px;
+            border-radius: var(--radius-md);
             text-align: center;
-            color: #64748b;
+            color: var(--text-muted);
             background: #f8fafc;
         }
 
         /* Update Status Button */
         .update-status-btn {
-            background: #16a34a;
+            background: var(--success);
             color: white;
             border: none;
             padding: 10px 16px;
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
             cursor: pointer;
             align-self: flex-start;
             font-weight: 600;
@@ -405,7 +409,7 @@
 
                         <div class="order-total-bar">
                             <span>Total Payable</span>
-                            <span class="order-total-amount">${{ order.total_amount }}</span>
+                            <span class="order-total-amount">Tk {{ order.total_amount }}</span>
                         </div>
 
                         {% if order.status == 'shipped' %}

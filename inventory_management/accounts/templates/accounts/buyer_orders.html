@@ -19,7 +19,7 @@
         flex-direction: column;
         gap: 12px;
         padding: 20px;
-        border: 1px solid #e2e8f0;
+        border: 1px solid var(--border);
         border-left: 4px solid #cbd5e1;
         border-radius: 14px;
         background: white;
@@ -27,9 +27,9 @@
     }
 
     .order-card.status-pending { border-left-color: #f59e0b; }
-    .order-card.status-approved { border-left-color: #2563eb; }
-    .order-card.status-shipped { border-left-color: #7c3aed; }
-    .order-card.status-delivered { border-left-color: #16a34a; }
+    .order-card.status-approved { border-left-color: var(--accent); }
+    .order-card.status-shipped { border-left-color: var(--purple); }
+    .order-card.status-delivered { border-left-color: var(--success); }
 
     .status-badge {
         display: inline-flex;
@@ -44,10 +44,10 @@
     }
 
     .status-badge i { font-size: 6px; }
-    .status-badge.status-pending { background: #fef3c7; color: #92400e; }
-    .status-badge.status-approved { background: #dbeafe; color: #1e40af; }
-    .status-badge.status-shipped { background: #ede9fe; color: #5b21b6; }
-    .status-badge.status-delivered { background: #dcfce7; color: #166534; }
+    .status-badge.status-pending { background: var(--warning-soft); color: #92400e; }
+    .status-badge.status-approved { background: var(--accent-soft); color: #1e40af; }
+    .status-badge.status-shipped { background: var(--purple-soft); color: #5b21b6; }
+    .status-badge.status-delivered { background: var(--success-soft); color: #166534; }
 
     .order-header {
         display: flex;
@@ -123,7 +123,7 @@
         font-size: 16px;
         font-weight: 700;
         padding-top: 8px;
-        border-top: 1px solid #e2e8f0;
+        border-top: 1px solid var(--border);
     }
 
     .empty-state {
@@ -131,7 +131,7 @@
         border: 1px dashed #cbd5e1;
         border-radius: 10px;
         text-align: center;
-        color: #64748b;
+        color: var(--text-muted);
         background: #f8fafc;
     }
 
@@ -157,17 +157,23 @@
             {% for item in order.items.all %}
             <div class="order-item-row">
                 <div class="order-image">
-                    {% if item.product.picture and item.product.picture.name %}
-                    <img src="{{ item.product.picture.url }}" alt="{{ item.product.name }}">
-                    {% else %}
-                    <img src="/media/product_images/default-image.jpg" alt="{{ item.product.name }}">
+                    {% if item.product %}
+                        {% if item.product.picture and item.product.picture.name %}
+                        <img src="{{ item.product.picture.url }}" alt="{{ item.product.name }}">
+                        {% else %}
+                        <img src="/media/product_images/default-image.jpg" alt="{{ item.product.name }}">
+                        {% endif %}
                     {% endif %}
                 </div>
                 <div class="order-item-info">
+                    {% if item.product %}
                     <span>{{ item.product.name }}</span>
-                    <span class="muted">Qty {{ item.quantity }} × ${{ item.unit_price }}</span>
+                    {% else %}
+                    <span class="muted">Product no longer available</span>
+                    {% endif %}
+                    <span class="muted">Qty {{ item.quantity }} × Tk {{ item.unit_price }}</span>
                 </div>
-                <div class="order-item-total">${{ item.line_total }}</div>
+                <div class="order-item-total">Tk {{ item.line_total }}</div>
             </div>
             {% endfor %}
         </div>
@@ -180,7 +186,7 @@
 
         <div class="order-total-row">
             <span>Total</span>
-            <span>${{ order.total_amount }}</span>
+            <span>Tk {{ order.total_amount }}</span>
         </div>
     </div>
     {% empty %}
