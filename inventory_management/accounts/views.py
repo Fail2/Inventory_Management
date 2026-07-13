@@ -517,6 +517,8 @@ def delete_order(request, order_id):
 
     with transaction.atomic():
         for item in order.items.all():
+            if item.product_id is None:
+                continue  # product was since deleted - nothing to restore stock to
             product = Product.objects.select_for_update().get(id=item.product_id)
             product.quantity += item.quantity
             product.save()

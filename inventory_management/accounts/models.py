@@ -116,7 +116,11 @@ class OrderGroup(models.Model):
 
 class OrderItem(models.Model):
     order = models.ForeignKey(OrderGroup, on_delete=models.CASCADE, related_name='items')
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
+    # SET_NULL (not CASCADE) so deleting a product from the catalog doesn't
+    # destroy historical order line items - unit_price/quantity are already
+    # snapshotted on this row, so totals stay correct even if the product
+    # referenced here is later removed.
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
     quantity = models.PositiveIntegerField()
     unit_price = models.DecimalField(max_digits=10, decimal_places=2)
 
