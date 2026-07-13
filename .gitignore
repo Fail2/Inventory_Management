@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+venv/
 
 # VS Code local history extension
 .history/
