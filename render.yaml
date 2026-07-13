@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: inventory-management
+    name: inventory-hub
     env: python
     region: oregon
     plan: free
@@ -15,7 +15,7 @@ services:
       - key: DJANGO_DEBUG
         value: "False"
       - key: DJANGO_ALLOWED_HOSTS
-        value: "inventory-management-hl9y.onrender.com"
+        value: "inventory-hub.onrender.com"
       - key: DJANGO_SECRET_KEY
         sync: false
       - key: EMAIL_HOST_USER
