@@ -79,16 +79,15 @@ class Product(models.Model):
         try:
             this = Product.objects.get(id=self.id)
             if this.picture and self.picture != this.picture:
-                if os.path.isfile(this.picture.path):
-                    os.remove(this.picture.path)
+                this.picture.delete(save=False)
         except Product.DoesNotExist:
             pass  # This is a new product, no need to delete anything
 
         super().save(*args, **kwargs)
 
     def delete(self, *args, **kwargs):
-        if self.picture and os.path.isfile(self.picture.path):
-            os.remove(self.picture.path)
+        if self.picture:
+            self.picture.delete(save=False)
         super().delete(*args, **kwargs)
 
 
