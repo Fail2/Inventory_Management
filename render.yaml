@@ -38,5 +38,18 @@ services:
       # set directly in the Render dashboard (the Neon connection string).
       - key: DATABASE_URL
         sync: false
-    autoDeploy: true
+      # Product images are stored on Cloudinary instead of the app's own
+      # disk - Render's free tier has no persistent disk, so uploaded
+      # images written locally are wiped on every redeploy.
+      - key: CLOUDINARY_CLOUD_NAME
+        sync: false
+      - key: CLOUDINARY_API_KEY
+        sync: false
+      - key: CLOUDINARY_API_SECRET
+        sync: false
+    # Deploys only run when triggered manually from the Render dashboard -
+    # every push used to redeploy automatically, which was disruptive mid-
+    # testing. Env var changes saved in the dashboard still redeploy
+    # regardless of this setting (Render always restarts to pick those up).
+    autoDeploy: false
     healthCheckPath: "/healthz/"
