@@ -81,6 +81,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'anymail',
     'accounts',
 ]
 
@@ -187,9 +188,14 @@ AUTH_USER_MODEL ='accounts.CustomUser'
 
 # settings.py
 
+# Render's free web services block outbound traffic to SMTP ports (25, 465,
+# 587), so raw SMTP (e.g. Gmail) silently hangs until gunicorn's worker
+# timeout kills the request. Anymail's Brevo backend sends over HTTPS
+# instead, which isn't blocked. EMAIL_BACKEND stays overridable via env var
+# for local/other setups that don't hit that restriction.
 _default_email_backend = (
     'django.core.mail.backends.console.EmailBackend' if DEBUG
-    else 'django.core.mail.backends.smtp.EmailBackend'
+    else 'anymail.backends.brevo.EmailBackend'
 )
 EMAIL_BACKEND = os.environ.get('EMAIL_BACKEND', _default_email_backend)
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
@@ -198,3 +204,7 @@ EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() in ('true', '1',
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@example.com')
+
+ANYMAIL = {
+    'BREVO_API_KEY': os.environ.get('ANYMAIL_BREVO_API_KEY', ''),
+}
