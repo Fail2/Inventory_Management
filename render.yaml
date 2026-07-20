@@ -9,8 +9,7 @@ services:
     buildCommand: >
       pip install -r ../requirements.txt &&
       python manage.py collectstatic --noinput &&
-      python manage.py migrate &&
-      python manage.py ensure_admin
+      python manage.py migrate
     startCommand: gunicorn inventory_management.wsgi --bind 0.0.0.0:$PORT --log-file -
     envVars:
       - key: DJANGO_DEBUG
@@ -25,12 +24,6 @@ services:
         sync: false
       # Must be a sender verified in your Brevo account, or sends will fail.
       - key: DEFAULT_FROM_EMAIL
-        sync: false
-      - key: DJANGO_SUPERUSER_USERNAME
-        sync: false
-      - key: DJANGO_SUPERUSER_EMAIL
-        sync: false
-      - key: DJANGO_SUPERUSER_PASSWORD
         sync: false
       # Points at a Neon Postgres database instead of a Render-managed one -
       # Render's own free Postgres was timing out on external connections,
